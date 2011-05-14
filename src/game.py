@@ -1,4 +1,5 @@
 from settings import *
+import os
 import pygame
 from pymunk import Vec2d
 import pymunk as pm
@@ -34,6 +35,7 @@ class game(object):
         self.snap_radius=5.0
         self.dec_snap_radius=0
         self.inc_snap_radius=0
+        self.level_path=os.path.join(RES, 'level.pickle')
         self.level = level()
         
         #PHYICS!!!!
@@ -55,6 +57,9 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         
         
+        self.level.load_level(self.level_path)
+        for line in self.level.lines.iterkeys():
+            self.space.add_static(self.level.lines[line].shape)
     
         #self.level = 
         
@@ -132,6 +137,15 @@ class game(object):
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
                     self.inc_snap_radius = True
+                    '''
+                elif e.key == K_l and self.mode_edit:
+                    self.level.load_level(self.level_path)
+                    for line in self.level.lines.iterkeys():
+                        self.space.add_static(self.level.lines[line].shape)
+                        '''
+                elif e.key == K_k and self.mode_edit:
+                    self.level.save_level(self.level_path)
+
             elif e.type == pygame.KEYUP:
                 if e.key == K_a:
                     self.pan_left = False
@@ -162,7 +176,6 @@ class game(object):
                 if e.button == 1 and self.mode_edit:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
-                        print pos_snap
                         self.pos_end=pos_snap
                     else:
                         self.pos_end=self.screen2world(e.pos)
