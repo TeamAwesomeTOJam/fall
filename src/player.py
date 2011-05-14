@@ -23,8 +23,8 @@ class Player(object):
         
     def draw(self, screen):
         surf = self.model.draw()
-        print self.body.velocity
-        if self.body.velocity.y < 0:
+        #print self.body.velocity
+        if self.body.velocity.x < 0:
             surf = pygame.transform.flip(surf, True, False)
         x, y = self.game.world2screen(self.body.position)
         x -= surf.get_width() / 2.0

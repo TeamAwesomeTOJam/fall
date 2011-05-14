@@ -95,6 +95,9 @@ class game(object):
         rx = self.camera_pos.x
         ry = self.camera_pos.y
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
+    
+    def on_ground(self):
+        
         
     
     def handle_input(self):
@@ -176,9 +179,9 @@ class game(object):
             p = self.player.shape.body.position
             a = (c - p).get_angle_degrees()
             #print a
-            if abs((a % 360) - 180) < 20:
+            if abs((a % 360) - 180) < PLAYER_WALL_COLLISION_ANGLE:
                 allow_left = False
-            if abs(a) < 20:
+            if abs(a) < PLAYER_WALL_COLLISION_ANGLE:
                 allow_right = False
             
         #control the player
