@@ -29,6 +29,8 @@ class game(object):
 
         #Editor events
         self.mode_edit=False
+        self.cmd_x=0
+        self.cmd_y=0
         self.pos_start=None
         self.pos_end=None
         self.pos_mouse=None
@@ -285,6 +287,15 @@ class game(object):
             #Draw mouse drag
             if self.pos_start is not None and self.pos_mouse is not None:
                 pygame.draw.line(screen, (0,0,0), self.world2screen(self.pos_start),self.world2screen(pre_end))
+            #draw edit osd
+            cmds = ["Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
+                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,"]
+            font = pygame.font.SysFont('helvetica',14)
+            for i in xrange(len(cmds)):
+                cmd=cmds[i]
+                surf=font.render(cmd,True,(40,40,40))
+                screen.blit(surf,(self.cmd_x,self.cmd_y+i*surf.get_height()))
+
 
         #Draw other stuff
         for shape in self.on_screen:
