@@ -1,10 +1,12 @@
 from settings import *
+import os
 import pygame
 from pymunk import Vec2d
 import pymunk as pm
 from pygame.locals import *
 from level import level
 from player import Player
+import pickle
 
 class game(object):
 
@@ -35,6 +37,7 @@ class game(object):
         self.snap_radius=5.0
         self.dec_snap_radius=0
         self.inc_snap_radius=0
+        self.level_path=os.path.join(RES, 'level.pickle')
         self.level = level()
         
         #PHYICS!!!!
@@ -99,6 +102,17 @@ class game(object):
         rx = self.camera_pos.x
         ry = self.camera_pos.y
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
+    
+    def load_level(self):
+        try:
+            infile = open(self.level_path, 'rb')
+            level = pickle.load(infile)
+            return level 
+        except:
+            return level()
+    def save_level(self):
+        outfile = open(self.level_path,'wb')
+        pickle.dump(self.level,outfile)
         
     
     def handle_input(self):
@@ -122,6 +136,11 @@ class game(object):
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
                     self.inc_snap_radius = True
+                elif e.key == K_l and self.mode_edit:
+                    self.load_level()
+                elif e.key == K_k and self.mode_edit:
+                    self.save_level()
+
             elif e.type == pygame.KEYUP:
                 if e.key == K_a:
                     self.pan_left = False

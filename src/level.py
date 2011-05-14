@@ -1,10 +1,12 @@
-import pickle
-
 class line():
     def __init__(self,start,end,shape,prop=None):
         self.start=start
         self.end=end
         self.prop=prop
+
+class level_save():
+    def __init__(self,level):
+
 
 class level():
     def __init__(self):
