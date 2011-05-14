@@ -268,6 +268,10 @@ class game(object):
 
         self.player.update(time)
         self.physics(time)
+        
+        if not self.mode_edit:
+            self.camera_pos = self.player.body.position
+        
         self.draw(screen)
         return 1
     
