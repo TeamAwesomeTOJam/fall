@@ -1,7 +1,11 @@
+import os, sys
 import math
+import pickle
 
 import pygame
 from pygame.locals import *
+
+import config
 
 SPINE = 0
 L_SHOULDER = 1
@@ -16,7 +20,7 @@ R_KNEE = 8
 
 class StickMan(object):
 
-    def __init__(self):
+    def __init__(self, animation_path):
         self.color = (255, 255, 255, 255)
         self.width = 2
         self.upper_arm_length = 18
@@ -25,8 +29,9 @@ class StickMan(object):
         self.lower_leg_length = 24
         self.head_radius = 16
         self.torso_length = 32
+        self.animation_path = animation_path
         self.animations = self.load_animations()
-        self.animation = self.animations['idle']
+        self.animation = self.animations[0]
         self.prev_frame = self.animation[0]
         self.next_frame = self.animation[0]
         self.frame_index = 0
@@ -38,10 +43,27 @@ class StickMan(object):
         return (x, y)
         
     def load_animations(self):
-        return {'idle' : Animation(1.0, [[-math.pi*0.5, -math.pi*0.5, math.pi*0.5, 1, -1,  -math.pi * 1.25, -math.pi * 1.75, 0, 0]])}
+        try:
+            in_file = open(self.animation_path, 'rb')
+            return pickle.load(in_file)
+        except:
+            return [Animation()]
     
     def save_animations(self):
-        pass
+        out_file = open(self.animation_path, 'wb')
+        pickle.dump(self.animations, out_file)
+
+    def play_animation(self, idx):
+        self.animation = self.animations[idx]
+        self.frame_index = 0
+        self.prev_frame = self.next_frame
+        self.next_frame = self.animation[self.frame_index]
+
+    def show_frame(self, idx):
+        self.frame_index = idx
+        self.frame_elapsed = 0
+        self.prev_frame = self.animation[self.frame_index]
+        self.next_frame = self.animation[(self.frame_index + 1) % len(self.animation)]
 
     def update(self, delta):
         self.frame_elapsed += delta
@@ -53,7 +75,7 @@ class StickMan(object):
     
     def draw(self, selection=None):
         ratio = self.frame_elapsed / self.animation.frame_duration
-        i_frame = [pf * (1 - ratio) + nf * (ratio) for pf, nf in zip(self.next_frame, self.prev_frame)]
+        i_frame = [pf * (1 - ratio) + nf * (ratio) for pf, nf in zip(self.prev_frame, self.next_frame)]
         
         hip_pos = (64, 64)
         shoulder_pos = self._get_endpoint(hip_pos, i_frame[SPINE], self.torso_length * 0.9)
@@ -81,7 +103,7 @@ class StickMan(object):
                  (r_knee_pos, r_foot_pos)]
         for i, (start, end) in enumerate(lines):
             if i == selection:
-                pygame.draw.line(surface, (255,255,0), start, end, self.width)
+                pygame.draw.line(surface, (255,0,0), start, end, self.width)
             else:
                 pygame.draw.line(surface, self.color, start, end, self.width)
         pygame.draw.circle(surface, self.color, head_pos, self.head_radius, self.width)
@@ -91,12 +113,24 @@ class StickMan(object):
 
 class Animation(object):
     
-    def __init__(self, duration, frames):
+    def __init__(self, duration=1.0, frames=None):
         self.duration = duration
-        self.frames = frames
+        if frames:
+            self.frames = frames
+        else:
+            self.frames = [[-math.pi*0.5, -math.pi*0.5, math.pi*0.5, 1, -1,  -math.pi * 1.25, -math.pi * 1.75, 0, 0]]
+    
+    def __len__(self):
+        return len(self.frames)
     
     def __getitem__(self, idx):
         return self.frames[idx]
+    
+    def __setitem(self, idx, value):
+        self.frames[idx] = value
+        
+    def __delitem(self, idx):
+        del self.frames[idx]
     
     def __iter__(self):
         return self.frames.__iter__
@@ -108,31 +142,73 @@ class Animation(object):
 
 if __name__ == '__main__':
     pygame.init()
-    screen = pygame.display.set_mode((128, 128))
+    pygame.key.set_repeat(500, 100)
+    screen = pygame.display.set_mode((256, 128))
     font = pygame.font.Font(None, 24)
-    sm = StickMan()
+    sm = StickMan(os.path.join(config.resource_path, 'animations.pickle'))
     joint = 0
+    frame = 0
+    animation = 0
+    play = False
+    clock = pygame.time.Clock()
     
     while True:
+        delta = clock.tick() / 1000.0
         
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
+                sys.exit()
             elif event.type == KEYDOWN and event.key == K_ESCAPE:
                 pygame.quit()
-            elif event.type == KEYDOWN and event.key == K_UP:
-                joint = (joint + 1) % 9
-            elif event.type == KEYDOWN and event.key == K_DOWN:
+                sys.exit()
+            elif event.type == KEYDOWN and event.key == K_s:
+                sm.save_animations()
+            elif event.type == KEYDOWN and event.key == K_n:
+                sm.animations.append(Animation())
+            elif event.type == KEYDOWN and event.key == K_p:
+                if play:
+                    play = False
+                else:
+                    play = True
+            elif event.type == KEYDOWN and event.key == K_LEFTBRACKET:
                 joint = (joint - 1) % 9
+            elif event.type == KEYDOWN and event.key == K_RIGHTBRACKET:
+                joint = (joint + 1) % 9
             elif event.type == KEYDOWN and event.key == K_EQUALS:
                 sm.prev_frame[joint] += 0.1
             elif event.type == KEYDOWN and event.key == K_MINUS:
                 sm.prev_frame[joint] -= 0.1
+            elif event.type == KEYDOWN and event.key == K_LEFT:
+                frame = (frame - 1) % len(sm.animation)
+                sm.show_frame(frame)
+            elif event.type == KEYDOWN and event.key == K_RIGHT:
+                frame = (frame + 1) % len(sm.animation)
+                sm.show_frame(frame)
+            elif event.type == KEYDOWN and event.key == K_UP:
+                animation = (animation - 1) % len(sm.animations)
+                sm.play_animation(animation)
+                sm.show_frame(0)
+            elif event.type == KEYDOWN and event.key == K_DOWN:
+                animation = (animation + 1) % len(sm.animations)
+                sm.play_animation(animation)
+                sm.show_frame(0)
+            elif event.type == KEYDOWN and event.key == K_COMMA:
+                pass
+            elif event.type == KEYDOWN and event.key == K_PERIOD:
+                new_frame = list(sm.prev_frame)
+                if sm.frame_index + 1 == len(sm.animation):
+                    sm.animation.frames.append(new_frame)
+                else:
+                    sm.animation.frames.insert(sm.frame_index + 1, new_frame)
+                        
+        if play:
+            sm.update(delta)
         
         screen.fill((0,0,0,255))
         surf = sm.draw(selection=joint)
         screen.blit(surf, (0,0))
-        text = font.render(str(joint), True, (255,255,255))
-        screen.blit(text, (100, 100)) 
+        screen.blit(font.render('Frame %s/%s' % (frame+1, len(sm.animation)), True, (255,255,255)), (128, 0))
+        screen.blit(font.render('Animation %s/%s' % (animation+1, len(sm.animations)), True, (255,255,255)), (128, 24))       
         pygame.display.flip()
 
