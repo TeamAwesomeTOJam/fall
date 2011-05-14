@@ -190,6 +190,15 @@ class game(object):
                     self.move_right = True
                 elif x == -1:
                     self.move_left = True
+            elif e.type == JOYAXISMOTION:
+                if e.axis == 0:
+                    if e.value < DEADZONE and e.value > -DEADZONE:
+                        self.move_left = False
+                        self.move_right = False
+                    elif e.value >= DEADZONE:
+                        self.move_right = True
+                    elif e.value <= -DEADZONE:
+                        self.move_left = True
             elif e.type == JOYBUTTONDOWN:
                 if e.button == 1 and self.on_ground():
                     self.jump = True
