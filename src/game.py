@@ -21,7 +21,6 @@ class game(object):
         pm.init_pymunk()
         self.space = pm.Space()
         self.space.gravity = Vec2d(0.0, -900.0)
-<<<<<<< HEAD
 
         #Editor events
         self.mode_edit=True
@@ -30,7 +29,11 @@ class game(object):
         self.pos_mouse=None
         self.snap_radius=5.0
         self.level = level()
-=======
+        
+        #PHYICS!!!!
+        pm.init_pymunk()
+        self.space = pm.Space()
+        self.space.gravity = Vec2d(0.0, -900.0)
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -53,7 +56,6 @@ class game(object):
     def collide_screen(self, space, arbiter):
         s1,s2 = arbiter.shapes
         self.on_screen.append(s2)
->>>>>>> ab082bbb0e1eb25e25a0f2dc5b7f8bafcba3f1ae
 
     def world2screen(self,v):
         x,y = v
@@ -114,13 +116,9 @@ class game(object):
 
 
     def tick(self,screen,clock):
-<<<<<<< HEAD
-        self.handle_input()
-=======
         time = clock.tick(60)/1000.0
-        
-        self.handel_input()
->>>>>>> ab082bbb0e1eb25e25a0f2dc5b7f8bafcba3f1ae
+        self.handle_input()
+
         if self.pan_left:
             self.camera_pos += Vec2d(-1 * PAN_SPEED, 0)
         if self.pan_right:
@@ -129,7 +127,6 @@ class game(object):
             self.camera_pos += Vec2d(0, PAN_SPEED)
         if self.pan_down:
             self.camera_pos += Vec2d(0, -1 * PAN_SPEED)
-<<<<<<< HEAD
         if self.dec_snap_radius:
             self.snap_radius-=1
             if self.snap_radius<0: self.snap_radius=0
@@ -140,10 +137,7 @@ class game(object):
             self.pos_start = None
             self.pos_end= None
 
-=======
-        
         self.physics(time)
->>>>>>> ab082bbb0e1eb25e25a0f2dc5b7f8bafcba3f1ae
         self.draw(screen)
         return 1
     
