@@ -34,6 +34,7 @@ class StickMan(object):
         self.animation_path = animation_path
         self.animations = self.load_animations()
         self.animation = self.animations[0]
+        self.default_animation = self.animations[0]
         self.prev_frame = self.animation[0]
         self.next_frame = self.animation[0]
         self.frame_index = 0
@@ -49,6 +50,7 @@ class StickMan(object):
             in_file = open(self.animation_path, 'rb')
             animations = pickle.load(in_file)
             for animation in animations:
+                animation.repeat = False
                 for frame in animation:
                     if len(frame) == 9:
                         frame.append(48.0)
@@ -60,11 +62,18 @@ class StickMan(object):
         out_file = open(self.animation_path, 'wb')
         pickle.dump(self.animations, out_file)
 
-    def play_animation(self, idx):
-        self.animation = self.animations[idx]
+    def play_animation(self, idx, repeat=False):
+        if isinstance(idx, Animation):
+            self.animation = idx
+        else:
+            self.animation = self.animations[idx]
+        self.animation.repeat = repeat
         self.frame_index = 0
         self.prev_frame = self.next_frame
         self.next_frame = self.animation[self.frame_index]
+        
+    def set_default_animation(self, idx):
+        self.default_animation = self.animations[idx]
 
     def show_frame(self, idx):
         self.frame_index = idx
@@ -77,8 +86,13 @@ class StickMan(object):
         if self.frame_elapsed >= self.animation.frame_duration:
             self.frame_elapsed -= self.animation.frame_duration
             self.prev_frame = self.next_frame
-            self.frame_index = (self.frame_index + 1) % len(self.animation)
-            self.next_frame = self.animation[self.frame_index]
+            if self.frame_index + 1 > len(self.animation):
+                if self.animation.repeat:
+                    self.frame_index = 0
+                    self.frame_index = (self.frame_index + 1) % len(self.animation)
+                    self.next_frame = self.animation[self.frame_index]
+                else: 
+                    self.play_animation(self.default_animation, repeat=True)
     
     def draw(self, editor=False, selection=None):
         ratio = self.frame_elapsed / self.animation.frame_duration
@@ -132,7 +146,8 @@ class Animation(object):
         if frames:
             self.frames = frames
         else:
-            self.frames = [[-math.pi*0.5, -math.pi*0.5, math.pi*0.5, 1, -1,  -math.pi * 1.25, -math.pi * 1.75, 0, 0]]
+            self.frames = [[-math.pi*0.5, -math.pi*0.5, math.pi*0.5, 1, -1,  -math.pi * 1.25, -math.pi * 1.75, 0, 0, 80]]
+        repeat = False
     
     def __len__(self):
         return len(self.frames)
