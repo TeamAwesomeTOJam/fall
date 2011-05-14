@@ -10,6 +10,8 @@ class game(object):
     def __init__(self):
         self.camera_pos = Vec2d(0,0)
         
+        self.on_screen = []
+        
         self.pan_left = False
         self.pan_right = False
         self.pan_up = False
@@ -19,8 +21,28 @@ class game(object):
         pm.init_pymunk()
         self.space = pm.Space()
         self.space.gravity = Vec2d(0.0, -900.0)
+        
+        #The screen to collide with what we need to draw
+        self.screen_body = pm.Body(pm.inf, pm.inf)
+        self.screen_shape = None
+        self.set_screen_shape()
+        self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
     
         #self.level = 
+        
+    def set_screen_shape(self):
+        if self.screen_shape:
+            self.space.remove(self.screen_shape)
+        pts = map(self.screen2world,[(0, 0), (WIDTH, 0), (WIDTH, HEIGHT), (0, HEIGHT)])
+        self.screen_shape = pm.Poly(self.screen_body, pts)
+        self.screen_shape.collision_type = COLLTYPE_SCREEN
+        self.space.add(self.screen_shape)
+        self.on_screen = []
+        
+    
+    def collide_screen(self, space, arbiter):
+        s1,s2 = arbiter.shapes
+        self.on_screen.append(s2)
 
     def world2screen(self,v):
         x,y = v
@@ -63,6 +85,8 @@ class game(object):
                     self.pan_down = False
 
     def tick(self,screen,clock):
+        time = clock.tick(60)/1000.0
+        
         self.handel_input()
         if self.pan_left:
             self.camera_pos += Vec2d(-1 * PAN_SPEED, 0)
@@ -72,9 +96,16 @@ class game(object):
             self.camera_pos += Vec2d(0, PAN_SPEED)
         if self.pan_down:
             self.camera_pos += Vec2d(0, -1 * PAN_SPEED)
+        
+        self.physics(time)
         self.draw(screen)
-        clock.tick(60)
         return 1
+    
+    def physics(self,time):
+        self.set_screen_shape()
+        self.space.step(time)
+        
+        
     
     def draw(self,screen):
         screen.fill((255,255,255))
