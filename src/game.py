@@ -189,11 +189,13 @@ class game(object):
                 elif x == -1:
                     self.move_left = True
             elif e.type == JOYBUTTONDOWN:
-                if e.button == 1:
-                    pass
+                if e.button == 1 and self.on_ground():
+                    self.jump = True
+                    self.jump_time = JUMP_TIME
+                    self.player.jump()
             elif e.type == JOYBUTTONUP:
                 if e.button == 1:
-                    pass
+                    self.jump = False
 
         if self.mode_edit:
             self.pos_mouse=pygame.mouse.get_pos()
