@@ -37,11 +37,21 @@ class game(object):
         self.space = pm.Space()
         self.space.gravity = Vec2d(0.0, -900.0)
         
+        #the player
+        self.player_body = pm.Body(PLAYER_MASS, pm.moment_for_circle(PLAYER_MASS, 0 ,PLAYER_RADIUS))
+        self.player_body.position = Vec2d(0,0)
+        self.player_shape = pm.Circle(self.player_body, PLAYER_RADIUS, (0,0))
+        self.player_shape.friction = PLAYER_FRICTION
+        self.player_shape.collision_type = COLLTYPE_PLAYER
+        self.space.add(self.player_body, self.player_shape)
+        
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
         self.screen_shape = None
         self.set_screen_shape()
+        
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
+        self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
         
         
     
@@ -60,6 +70,9 @@ class game(object):
     def collide_screen(self, space, arbiter):
         s1,s2 = arbiter.shapes
         self.on_screen.append(s2)
+        return False
+    
+    def ignore_collision(self, space, arbiter):
         return False
 
     def world2screen(self,v):
@@ -158,6 +171,14 @@ class game(object):
     def draw(self,screen):
         screen.fill((255,255,255))
         pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
+        #Draw the player
+        r = self.player_shape.radius
+        v = self.player_shape.body.position
+        rot = self.player_shape.body.rotation_vector
+        p = self.world2screen(v)
+        p2 = Vec2d(rot.x, -rot.y) * r
+        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
+        pygame.draw.line(screen, (255,0,0), p, p+p2)
         #Draw mouse drag
         if self.pos_start is not None and self.pos_mouse is not None:
             pygame.draw.line(screen, (180,180,180), self.world2screen(self.pos_start),self.world2screen(self.pos_mouse))
