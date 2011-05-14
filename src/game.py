@@ -28,7 +28,7 @@ class game(object):
         self.jump_time = 0
 
         #Editor events
-        self.mode_edit=True
+        self.mode_edit=False
         self.pos_start=None
         self.pos_end=None
         self.pos_mouse=None
@@ -38,7 +38,7 @@ class game(object):
         self.level_path=os.path.join(RES, 'level.pickle')
         self.level = level()
         
-        #PHYICS!!!!
+        #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
         self.space.gravity = Vec2d(0.0, -900.0)
@@ -135,6 +135,8 @@ class game(object):
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
+                elif e.key == K_e:
+                    self.mode_edit = not self.mode_edit
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
@@ -181,6 +183,24 @@ class game(object):
                         self.pos_end=pos_snap
                     else:
                         self.pos_end=self.screen2world(e.pos)
+            elif e.type == JOYHATMOTION:
+                x, y = e.value
+                if x == 0:
+                    self.move_left = False
+                    self.move_right = False
+                elif x == 1:
+                    self.move_right = True
+                elif x == -1:
+                    self.move_left = True
+            elif e.type == JOYBUTTONDOWN:
+                if e.button == 1 and self.on_ground():
+                    self.jump = True
+                    self.jump_time = JUMP_TIME
+                    self.player.jump()
+            elif e.type == JOYBUTTONUP:
+                if e.button == 1:
+                    self.jump = False
+
         if self.mode_edit:
             self.pos_mouse=pygame.mouse.get_pos()
             if self.pos_mouse is not None: self.pos_mouse=self.screen2world(self.pos_mouse)
@@ -252,6 +272,10 @@ class game(object):
 
         self.player.update(time)
         self.physics(time)
+        
+        if not self.mode_edit:
+            self.camera_pos = self.player.body.position
+        
         self.draw(screen)
         return 1
     
@@ -265,14 +289,14 @@ class game(object):
 
         #Draw the player
         self.player.draw(screen)
-        r = self.player.shape.radius
-        v = self.player.shape.body.position
-        rot = self.player.shape.body.rotation_vector
-        p = self.world2screen(v)
-        p2 = Vec2d(rot.x, -rot.y) * r
-        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
-        pygame.draw.line(screen, (255,0,0), p, p+p2)
-        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
+#        r = self.player.shape.radius
+#        v = self.player.shape.body.position
+#        rot = self.player.shape.body.rotation_vector
+#        p = self.world2screen(v)
+#        p2 = Vec2d(rot.x, -rot.y) * r
+#        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
+#        pygame.draw.line(screen, (255,0,0), p, p+p2)
+#        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
         
         if self.mode_edit:
