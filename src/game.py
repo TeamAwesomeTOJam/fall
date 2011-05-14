@@ -152,6 +152,22 @@ class game(object):
                         self.pos_end=pos_snap
                     else:
                         self.pos_end=self.screen2world(e.pos)
+            elif e.type == JOYHATMOTION:
+                x, y = e.value
+                if x == 0:
+                    self.move_left = False
+                    self.move_right = False
+                elif x == 1:
+                    self.move_right = True
+                elif x == -1:
+                    self.move_left = True
+            elif e.type == JOYBUTTONDOWN:
+                if e.button == 1:
+                    pass
+            elif e.type == JOYBUTTONUP:
+                if e.button == 1:
+                    pass
+
         if self.mode_edit:
             self.pos_mouse=pygame.mouse.get_pos()
             if self.pos_mouse is not None: self.pos_mouse=self.screen2world(self.pos_mouse)
