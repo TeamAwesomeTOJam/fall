@@ -75,7 +75,7 @@ class StickMan(object):
     def set_default_animation(self, idx):
         old_default = self.default_animation
         self.default_animation = self.animations[idx]
-        if self.animation == self.animations[old_default]:
+        if self.animation == old_default:
             self.play_animation(idx, repeat=True)
         
     def show_frame(self, idx):
