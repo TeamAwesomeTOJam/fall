@@ -21,11 +21,6 @@ class game(object):
         
         self.move_left = False
         self.move_right = False
-        
-        #PHYICS!!!!
-        pm.init_pymunk()
-        self.space = pm.Space()
-        self.space.gravity = Vec2d(0.0, -900.0)
 
         #Editor events
         self.mode_edit=True
@@ -160,7 +155,8 @@ class game(object):
 
 
     def tick(self,screen,clock):
-        time = clock.tick(60)/1000.0
+        time = clock.tick(50)/1000.0
+        pygame.display.set_caption("fps: " + str(clock.get_fps()))
         self.handle_input()
 
         if self.pan_left:
