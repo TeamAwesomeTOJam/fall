@@ -28,7 +28,7 @@ class game(object):
         self.jump_time = 0
 
         #Editor events
-        self.mode_edit=True
+        self.mode_edit=False
         self.pos_start=None
         self.pos_end=None
         self.pos_mouse=None
@@ -38,7 +38,7 @@ class game(object):
         self.level_path=os.path.join(RES, 'level.pickle')
         self.level = level()
         
-        #PHYICS!!!!
+        #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
         self.space.gravity = Vec2d(0.0, -900.0)
@@ -133,6 +133,8 @@ class game(object):
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
+                elif e.key == K_e:
+                    self.mode_edit = not self.mode_edit
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
