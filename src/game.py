@@ -11,6 +11,7 @@ class game(object):
         self.camera_pos = Vec2d(0,0)
         
         self.on_screen = []
+        self.player_collisions = []
         
         self.pan_left = False
         self.pan_right = False
@@ -55,6 +56,7 @@ class game(object):
         
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         
         
     
@@ -77,6 +79,12 @@ class game(object):
     
     def ignore_collision(self, space, arbiter):
         return False
+    
+    def collect_player_collisions(self, space, arbiter):
+        for c in arbiter.contacts:
+            self.player_collisions.append(c.position)
+        return True
+        
 
     def world2screen(self,v):
         x,y = v
@@ -189,6 +197,7 @@ class game(object):
     
     def physics(self,time):
         self.set_screen_shape()
+        self.player_collisions = []
         self.space.step(time)
     
     def draw(self,screen):
