@@ -86,13 +86,14 @@ class StickMan(object):
         if self.frame_elapsed >= self.animation.frame_duration:
             self.frame_elapsed -= self.animation.frame_duration
             self.prev_frame = self.next_frame
-            if self.frame_index + 1 > len(self.animation):
+            self.frame_index = (self.frame_index + 1) % len(self.animation)
+            if self.frame_index == 0:
                 if self.animation.repeat:
-                    self.frame_index = 0
-                    self.frame_index = (self.frame_index + 1) % len(self.animation)
                     self.next_frame = self.animation[self.frame_index]
                 else: 
                     self.play_animation(self.default_animation, repeat=True)
+            else:
+                self.next_frame = self.animation[self.frame_index]
     
     def draw(self, editor=False, selection=None):
         ratio = self.frame_elapsed / self.animation.frame_duration
@@ -226,11 +227,11 @@ if __name__ == '__main__':
                 sm.show_frame(frame)
             elif event.type == KEYDOWN and event.key == K_UP:
                 animation = (animation - 1) % len(sm.animations)
-                sm.play_animation(animation)
+                sm.play_animation(animation, repeat=True)
                 sm.show_frame(0)
             elif event.type == KEYDOWN and event.key == K_DOWN:
                 animation = (animation + 1) % len(sm.animations)
-                sm.play_animation(animation)
+                sm.play_animation(animation, repeat=True)
                 sm.show_frame(0)
             elif event.type == KEYDOWN and event.key == K_COMMA:
                 new_frame = list(sm.prev_frame)
