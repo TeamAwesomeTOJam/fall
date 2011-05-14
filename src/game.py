@@ -171,21 +171,33 @@ class game(object):
             self.camera_pos += Vec2d(0, PAN_SPEED)
         if self.pan_down:
             self.camera_pos += Vec2d(0, -1 * PAN_SPEED)
-            
+        
+        #check to see if the player is allowed to move left/right
+        allow_left = True
+        allow_right = True
+        for c in self.player_collisions:
+            p = self.player.shape.body.position
+            a = (c - p).get_angle_degrees()
+            #print a
+            if abs((a % 360) - 180) < 20:
+                allow_left = False
+            if abs(a) < 20:
+                allow_right = False
             
         #control the player
         speed = 0
-        if self.move_left:
+        if self.move_left and allow_left:
             speed -= PLAYER_SPEED
-        if self.move_right:
+        if self.move_right and allow_right:
             speed += PLAYER_SPEED
+        
+        
         
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
         self.player.body.angle = 0
         self.player.body.angular_velocity = 0
         
-        self.player.update(time)
         if self.mode_edit:
             if self.dec_snap_radius:
                 self.snap_radius-=1
@@ -201,6 +213,7 @@ class game(object):
                 self.pos_start = None
                 self.pos_end= None
 
+        self.player.update(time)
         self.physics(time)
         self.draw(screen)
         return 1
