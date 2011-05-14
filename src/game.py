@@ -125,6 +125,8 @@ class game(object):
                     self.pan_up = True
                 elif e.key == K_s:
                     self.pan_down = True
+                elif e.key == K_r:
+                    self.space.gravity = -1 * self.space.gravity
                 elif e.key == K_LEFT:
                     self.move_left = True
                 elif e.key == K_RIGHT:

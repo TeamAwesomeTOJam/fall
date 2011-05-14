@@ -18,6 +18,7 @@ class Player(object):
         self.model = StickMan(os.path.join(RES, 'animations.pickle'))
         self.model.set_default_animation(0)
         self.dir = 1
+        self.orientation = 1
     
     def update(self, dt):
         self.model.update(dt)
@@ -33,6 +34,9 @@ class Player(object):
     
     def jump(self):
         self.model.play_animation(2)
+    
+    def flip(self):
+        self.orientation *= -1
         
     def draw(self, screen):
         surf = self.model.draw()
@@ -43,6 +47,9 @@ class Player(object):
             self.dir = 1
         if self.dir == -1:
             surf = pygame.transform.flip(surf, True, False)
+        
+        if self.orientation == -1:
+            surf = pygame.transform.flip(surf, False, True)
         x, y = self.game.world2screen(self.body.position)
         x -= surf.get_width() / 2.0
         y -= surf.get_height() - PLAYER_RADIUS - 8 
