@@ -170,7 +170,7 @@ class game(object):
     
     def draw(self,screen):
         screen.fill((255,255,255))
-        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
+
         #Draw the player
         r = self.player_shape.radius
         v = self.player_shape.body.position

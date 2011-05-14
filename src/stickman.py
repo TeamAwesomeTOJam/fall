@@ -81,8 +81,8 @@ class StickMan(object):
         self.prev_frame = self.animation[self.frame_index]
         self.next_frame = self.animation[(self.frame_index + 1) % len(self.animation)]
 
-    def update(self, td):
-        self.frame_elapsed += td
+    def update(self, dt):
+        self.frame_elapsed += dt
         if self.frame_elapsed >= self.animation.frame_duration:
             self.frame_elapsed -= self.animation.frame_duration
             self.prev_frame = self.next_frame
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     
     while True:
-        td = clock.tick() / 1000.0
+        dt = clock.tick() / 1000.0
         
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -243,7 +243,7 @@ if __name__ == '__main__':
                 sm.show_frame(sm.frame_index + 1)
                         
         if play:
-            sm.update(td)
+            sm.update(dt)
         
         screen.fill((0,0,0,255))
         surf = sm.draw(editor=True, selection=control)
