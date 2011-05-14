@@ -84,6 +84,7 @@ class game(object):
         return True
         
 
+
     def world2screen(self,v):
         x,y = v
         w = WIDTH
@@ -141,10 +142,19 @@ class game(object):
                     self.inc_snap_radius = False
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 if e.button == 1 and self.mode_edit:
-                    self.pos_start=self.screen2world(e.pos)
+                    pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
+                    if pos_snap is not None:
+                        self.pos_start=pos_snap
+                    else:
+                        self.pos_start=self.screen2world(e.pos)
             elif e.type == pygame.MOUSEBUTTONUP:
                 if e.button == 1 and self.mode_edit:
-                    self.pos_end=self.screen2world(e.pos)
+                    pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
+                    if pos_snap is not None:
+                        print pos_snap
+                        self.pos_end=pos_snap
+                    else:
+                        self.pos_end=self.screen2world(e.pos)
         if self.mode_edit:
             self.pos_mouse=pygame.mouse.get_pos()
             if self.pos_mouse is not None: self.pos_mouse=self.screen2world(self.pos_mouse)
@@ -162,33 +172,48 @@ class game(object):
             self.camera_pos += Vec2d(0, PAN_SPEED)
         if self.pan_down:
             self.camera_pos += Vec2d(0, -1 * PAN_SPEED)
-        if self.dec_snap_radius:
-            self.snap_radius-=1
-            if self.snap_radius<0: self.snap_radius=0
-        if self.inc_snap_radius:
-            self.snap_radius+=1
-            
-        if self.pos_start is not None and self.pos_end is not None:
-            body = pm.Body(pm.inf, pm.inf)
-            shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
-            shape.friction = 1.0
-            self.space.add_static(shape)
-            self.level.add_line(self.pos_start,self.pos_end,shape)
-            self.pos_start = None
-            self.pos_end= None
+        
+        #check to see if the player is allowed to move left/right
+        allow_left = True
+        allow_right = True
+        for c in self.player_collisions:
+            p = self.player.shape.body.position
+            a = (c - p).get_angle_degrees()
+            #print a
+            if abs((a % 360) - 180) < 20:
+                allow_left = False
+            if abs(a) < 20:
+                allow_right = False
             
         #control the player
         speed = 0
-        if self.move_left:
+        if self.move_left and allow_left:
             speed -= PLAYER_SPEED
-        if self.move_right:
+        if self.move_right and allow_right:
             speed += PLAYER_SPEED
+        
+        
         
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
         self.player.body.angle = 0
         self.player.body.angular_velocity = 0
         
+        if self.mode_edit:
+            if self.dec_snap_radius:
+                self.snap_radius-=1
+                if self.snap_radius<1: self.snap_radius=1
+            if self.inc_snap_radius:
+                self.snap_radius+=1
+            if self.pos_start is not None and self.pos_end is not None:
+                body = pm.Body(pm.inf, pm.inf)
+                shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
+                shape.friction = 1.0
+                self.space.add_static(shape)
+                self.level.add_line(self.pos_start,self.pos_end,shape)
+                self.pos_start = None
+                self.pos_end= None
+
         self.player.update(time)
         self.physics(time)
         self.draw(screen)
@@ -204,17 +229,27 @@ class game(object):
 
         #Draw the player
         self.player.draw(screen)
+        r = self.player.shape.radius
+        v = self.player.shape.body.position
+        rot = self.player.shape.body.rotation_vector
+        p = self.world2screen(v)
+        p2 = Vec2d(rot.x, -rot.y) * r
+        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
+        pygame.draw.line(screen, (255,0,0), p, p+p2)
+        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
-#        r = self.player.shape.radius
-#        v = self.player.shape.body.position
-#        rot = self.player.shape.body.rotation_vector
-#        p = self.world2screen(v)
-#        p2 = Vec2d(rot.x, -rot.y) * r
-#        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
-#        pygame.draw.line(screen, (255,0,0), p, p+p2)
-        #Draw mouse drag
-        if self.pos_start is not None and self.pos_mouse is not None:
-            pygame.draw.line(screen, (180,180,180), self.world2screen(self.pos_start),self.world2screen(self.pos_mouse))
+        
+        if self.mode_edit:
+            pos_snap=self.level.check_snap(self.pos_mouse,self.snap_radius)
+            if pos_snap is not None:
+                pre_end=pos_snap
+                pygame.draw.circle(screen, (255,0,0) , self.world2screen(pos_snap),int(self.snap_radius),1)
+            else:
+                pre_end=self.pos_mouse
+            #Draw mouse drag
+            if self.pos_start is not None and self.pos_mouse is not None:
+                pygame.draw.line(screen, (0,0,0), self.world2screen(self.pos_start),self.world2screen(pre_end))
+
         #Draw other stuff
         for shape in self.on_screen:
             line = self.level.get_line(shape)
