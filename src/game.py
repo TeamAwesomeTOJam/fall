@@ -6,7 +6,6 @@ import pymunk as pm
 from pygame.locals import *
 from level import level
 from player import Player
-import pickle
 
 
 class game(object):
@@ -60,6 +59,9 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         
         
+        self.level.load_level(self.level_path)
+        for line in self.level.lines.iterkeys():
+            self.space.add_static(self.level.lines[line].shape)
     
         #self.level = 
         
@@ -104,16 +106,6 @@ class game(object):
         ry = self.camera_pos.y
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
     
-    def load_level(self):
-        try:
-            infile = open(self.level_path, 'rb')
-            level = pickle.load(infile)
-            return level 
-        except:
-            return level()
-    def save_level(self):
-        outfile = open(self.level_path,'wb')
-        pickle.dump(self.level,outfile)
         
     
     def handle_input(self):
@@ -137,10 +129,14 @@ class game(object):
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
                     self.inc_snap_radius = True
+                    '''
                 elif e.key == K_l and self.mode_edit:
-                    self.load_level()
+                    self.level.load_level(self.level_path)
+                    for line in self.level.lines.iterkeys():
+                        self.space.add_static(self.level.lines[line].shape)
+                        '''
                 elif e.key == K_k and self.mode_edit:
-                    self.save_level()
+                    self.level.save_level(self.level_path)
 
             elif e.type == pygame.KEYUP:
                 if e.key == K_a:
@@ -170,7 +166,6 @@ class game(object):
                 if e.button == 1 and self.mode_edit:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
-                        print pos_snap
                         self.pos_end=pos_snap
                     else:
                         self.pos_end=self.screen2world(e.pos)
