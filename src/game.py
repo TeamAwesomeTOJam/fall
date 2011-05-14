@@ -32,7 +32,7 @@ class game(object):
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
         
     
-    def handel_input(self):
+    def handle_input(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 exit()
@@ -56,7 +56,7 @@ class game(object):
                     self.pan_down = False
 
     def tick(self,screen,clock):
-        self.handel_input()
+        self.handle_input()
         if self.pan_left:
             self.camera_pos += Vec2d(-1 * PAN_SPEED, 0)
         if self.pan_right:
