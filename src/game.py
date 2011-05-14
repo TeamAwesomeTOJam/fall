@@ -1,4 +1,5 @@
 from settings import *
+import os
 import pygame
 from pymunk import Vec2d
 import pymunk as pm
@@ -22,6 +23,9 @@ class game(object):
         
         self.move_left = False
         self.move_right = False
+        
+        self.jump = False
+        self.jump_time = 0
 
         #Editor events
         self.mode_edit=True
@@ -31,6 +35,7 @@ class game(object):
         self.snap_radius=5.0
         self.dec_snap_radius=0
         self.inc_snap_radius=0
+        self.level_path=os.path.join(RES, 'level.pickle')
         self.level = level()
         
         #PHYICS!!!!
@@ -52,6 +57,9 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         
         
+        self.level.load_level(self.level_path)
+        for line in self.level.lines.iterkeys():
+            self.space.add_static(self.level.lines[line].shape)
     
         #self.level = 
         
@@ -97,8 +105,13 @@ class game(object):
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
     
     def on_ground(self):
-        pass
-        
+        for c in self.player_collisions:
+            p = self.player.shape.body.position
+            a = (c - p).get_angle_degrees()
+            if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
+                return True
+        return False
+
     def handle_input(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -116,10 +129,23 @@ class game(object):
                     self.move_left = True
                 elif e.key == K_RIGHT:
                     self.move_right = True
+                elif e.key == K_SPACE and self.on_ground():
+                    self.jump = True
+                    self.jump_time = JUMP_TIME
+                    self.player.jump()
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
                     self.inc_snap_radius = True
+                    '''
+                elif e.key == K_l and self.mode_edit:
+                    self.level.load_level(self.level_path)
+                    for line in self.level.lines.iterkeys():
+                        self.space.add_static(self.level.lines[line].shape)
+                        '''
+                elif e.key == K_k and self.mode_edit:
+                    self.level.save_level(self.level_path)
+
             elif e.type == pygame.KEYUP:
                 if e.key == K_a:
                     self.pan_left = False
@@ -133,6 +159,8 @@ class game(object):
                     self.move_left = False
                 elif e.key == K_RIGHT:
                     self.move_right = False
+                elif e.key == K_SPACE:
+                    self.jump = False
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= False 
                 elif e.key == K_PERIOD and self.mode_edit:
@@ -148,7 +176,6 @@ class game(object):
                 if e.button == 1 and self.mode_edit:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
-                        print pos_snap
                         self.pos_end=pos_snap
                     else:
                         self.pos_end=self.screen2world(e.pos)
@@ -206,8 +233,17 @@ class game(object):
         if self.move_right and allow_right:
             speed += PLAYER_SPEED
         
+        if self.jump and self.jump_time > 0:
+            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
+            self.jump_time -= time
         
-        
+        if speed and self.on_ground():
+            self.player.walk()
+        elif self.on_ground():
+            self.player.idle()
+        else:
+            self.player.fly()
+            
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
         self.player.body.angle = 0

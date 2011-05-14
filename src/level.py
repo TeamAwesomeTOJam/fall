@@ -1,17 +1,62 @@
+import os
 import pickle
+import pymunk as pm
+from pymunk import Vec2d
+
 
 class line():
     def __init__(self,start,end,shape,prop=None):
         self.start=start
         self.end=end
+        self.shape=shape
         self.prop=prop
 
+class level_save():
+    def __init__(self,level):
+        self.lines=[]
+        self.areas=level.areas
+        self.enemies=level.enemies
+        self.snaps=level.snaps
+
+        for key in level.lines.iterkeys():
+            line=level.lines[key]
+            self.lines.append(((line.start[0],line.start[1]),(line.end[0],line.end[1]),line.prop))
+
+
 class level():
-    def __init__(self):
-        self.lines={}
-        self.areas=[]
-        self.enemies=[]
-        self.snaps={}
+    def __init__(self, loadfile=None):
+        if loadfile==None:
+            self.lines={}
+            self.areas=[]
+            self.enemies=[]
+            self.snaps={}
+        else:
+            self.load_level()
+                
+
+
+
+    def load_level(self,path):
+        try:
+            infile = open(path, 'rb')
+            slevel = pickle.load(infile)
+            self.lines={}
+            self.areas=slevel.areas
+            self.enemies=slevel.enemies
+            self.snaps=slevel.snaps
+            for line in slevel.lines:
+                body = pm.Body(pm.inf, pm.inf)
+                start=Vec2d(line[0])
+                end=Vec2d(line[1])
+                shape = pm.Segment(body, start, end, 5.0)
+                self.add_line(start,end,shape,line[2])
+        except:
+            return level()
+
+    def save_level(self,path):
+        outfile = open(path,'wb')
+        save=level_save(self)
+        pickle.dump(save,outfile)
 
     def get_line(self, shape):
         return self.lines[shape]
@@ -22,8 +67,8 @@ class level():
             dict[v]+=1
         else:
             dict[v]=1
-    def add_line(self, start, end,shape):
-        self.lines[shape] = line(start, end, shape)
+    def add_line(self, start, end,shape,prop=None):
+        self.lines[shape] = line(start, end, shape,prop)
         self.add_or_inc(self.snaps,(start[0],start[1]))
         self.add_or_inc(self.snaps,(end[0],end[1]))
 
