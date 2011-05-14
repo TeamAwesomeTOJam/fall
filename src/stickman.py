@@ -197,10 +197,7 @@ if __name__ == '__main__':
             elif event.type == KEYDOWN and event.key == K_n:
                 sm.animations.append(Animation())
             elif event.type == KEYDOWN and event.key == K_p:
-                if play:
-                    play = False
-                else:
-                    play = True
+                play = not play
             elif event.type == KEYDOWN and event.key == K_LEFTBRACKET:
                 control = (control - 1) % (len(sm.prev_frame) + 1)
             elif event.type == KEYDOWN and event.key == K_RIGHTBRACKET:
