@@ -157,7 +157,7 @@ class game(object):
             pygame.draw.line(screen, (180,180,180), self.world2screen(self.pos_start),self.world2screen(self.pos_mouse))
         #Draw other stuff
         for line in self.level.lines:
-            pygame.draw.line(screen, (180,180,180), self.world2screen(line[0]),self.world2screen(line[1]))
+            pygame.draw.line(screen, (180,180,180), self.world2screen(line.start),self.world2screen(line.end))
 
         pygame.display.flip()
         
