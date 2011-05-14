@@ -240,8 +240,8 @@ class game(object):
 
 
     def tick(self,screen,clock):
-        time = clock.tick(50)/1000.0
-        pygame.display.set_caption("fps: " + str(clock.get_fps()))
+        time = clock.tick(60)/1000.0
+        #pygame.display.set_caption("fps: " + str(clock.get_fps()))
         self.handle_input()
 
         if self.pan_left:
