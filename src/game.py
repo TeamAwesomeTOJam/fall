@@ -28,6 +28,8 @@ class game(object):
         self.pos_end=None
         self.pos_mouse=None
         self.snap_radius=5.0
+        self.dec_snap_radius=0
+        self.inc_snap_radius=0
         self.level = level()
         
         #PHYICS!!!!
