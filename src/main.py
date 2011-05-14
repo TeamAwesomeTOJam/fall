@@ -23,5 +23,4 @@ def main():
         if state == 4:
             exit()
 
-
 if __name__ == '__main__': main()
