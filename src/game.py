@@ -17,6 +17,9 @@ class game(object):
         self.pan_up = False
         self.pan_down = False
         
+        self.move_left = False
+        self.move_right = False
+        
         #PHYICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
@@ -105,6 +108,10 @@ class game(object):
                     self.pan_up = True
                 elif e.key == K_s:
                     self.pan_down = True
+                elif e.key == K_LEFT:
+                    self.move_left = True
+                elif e.key == K_RIGHT:
+                    self.move_right = True
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
@@ -118,6 +125,10 @@ class game(object):
                     self.pan_up = False
                 elif e.key == K_s:
                     self.pan_down = False
+                elif e.key == K_LEFT:
+                    self.move_left = False
+                elif e.key == K_RIGHT:
+                    self.move_right = False
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= False 
                 elif e.key == K_PERIOD and self.mode_edit:
@@ -153,12 +164,24 @@ class game(object):
             
         if self.pos_start is not None and self.pos_end is not None:
             body = pm.Body(pm.inf, pm.inf)
-            shape = pm.Segment(body, self.pos_start, self.pos_end, 0.0)
+            shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
             shape.friction = 1.0
             self.space.add_static(shape)
             self.level.add_line(self.pos_start,self.pos_end,shape)
             self.pos_start = None
             self.pos_end= None
+            
+        #control the player
+        speed = 0
+        if self.move_left:
+            speed -= PLAYER_SPEED
+        if self.move_right:
+            speed += PLAYER_SPEED
+        
+        self.player_body.velocity = Vec2d(speed,self.player_body.velocity[1])
+            
+        self.player_body.angle = 0
+        self.player_body.angular_velocity = 0
 
         self.physics(time)
         self.draw(screen)
@@ -185,7 +208,7 @@ class game(object):
         #Draw other stuff
         for shape in self.on_screen:
             line = self.level.get_line(shape)
-            pygame.draw.line(screen, (180,180,180), self.world2screen(line.start),self.world2screen(line.end))
+            pygame.draw.line(screen, (180,180,180), self.world2screen(line.start),self.world2screen(line.end),10)
 
         pygame.display.flip()
         
