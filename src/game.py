@@ -22,6 +22,9 @@ class game(object):
         
         self.move_left = False
         self.move_right = False
+        
+        self.jump = False
+        self.jump_time = 0
 
         #Editor events
         self.mode_edit=True
@@ -97,7 +100,12 @@ class game(object):
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
     
     def on_ground(self):
-        
+        for c in self.player_collisions:
+            p = self.player.shape.body.position
+            a = (c - p).get_angle_degrees()
+            if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
+                return True
+        return False
         
     
     def handle_input(self):
@@ -117,6 +125,9 @@ class game(object):
                     self.move_left = True
                 elif e.key == K_RIGHT:
                     self.move_right = True
+                elif e.key == K_SPACE and self.on_ground():
+                    self.jump = True
+                    self.jump_time = JUMP_TIME
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
@@ -134,6 +145,8 @@ class game(object):
                     self.move_left = False
                 elif e.key == K_RIGHT:
                     self.move_right = False
+                elif e.key == K_SPACE:
+                    self.jump = False
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= False 
                 elif e.key == K_PERIOD and self.mode_edit:
@@ -191,7 +204,9 @@ class game(object):
         if self.move_right and allow_right:
             speed += PLAYER_SPEED
         
-        
+        if self.jump and self.jump_time > 0:
+            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
+            self.jump_time -= time
         
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
