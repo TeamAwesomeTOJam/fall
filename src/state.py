@@ -12,16 +12,15 @@ def attract(screen,clock):
 			((width-press.get_width())*.5,height*.5-press.get_height()))
 	screen.blit(start,\
 			((width-start.get_width())*.5,height*.5))
-	waiting = True
-	while waiting:
-		for e in pygame.event.get():
-			if e.type == pygame.QUIT:
-				exit()
-			if e.type == pygame.KEYDOWN:
-				if e.key == pygame.K_RETURN:
-					return 1
-		clock.tick(10)
-		pygame.display.flip()
+	for e in pygame.event.get():
+		if e.type == pygame.QUIT:
+			exit()
+		if e.type == pygame.KEYDOWN:
+			if e.key == pygame.K_RETURN:
+				return 1
+	clock.tick(10)
+	pygame.display.flip()
+	return 0
 
 
 def play_game(screen,clock):
@@ -41,17 +40,16 @@ def pause(screen,clock):
 	pause=font.render('Paused',True,(255,0,0))
 	screen.blit(pause,\
 			((width-pause.get_width())*.5,(height-pause.get_height())*.5))
-	waiting = True
-	while waiting:
-		for e in pygame.event.get():
-			if e.type == pygame.QUIT:
-				exit()
-			if e.type == pygame.KEYDOWN:
-				if e.key == pygame.K_RETURN:
-					return 1
-		clock.tick(10)
-		pygame.blit(ingameSurface,(0,0))
-		pygame.display.flip()
+	for e in pygame.event.get():
+		if e.type == pygame.QUIT:
+			exit()
+		if e.type == pygame.KEYDOWN:
+			if e.key == pygame.K_RETURN:
+				return 1
+	clock.tick(10)
+	pygame.blit(ingameSurface,(0,0))
+	pygame.display.flip()
+	return 2
 
 def game_over(screen,clock):
 	height = screen.get_height()
@@ -63,13 +61,11 @@ def game_over(screen,clock):
 	screen.blit(gameover,\
 			((width-gameover.get_width())*.5,(height-gameover.get_height())*.5))
 
-	waiting = True
-	while waiting:
-		for e in pygame.event.get():
-			if e.type == pygame.QUIT:
-				exit()
-			if e.type == pygame.KEYDOWN:
-				if e.key == pygame.K_RETURN:
-					return 4
-		clock.tick(10)
-		pygame.display.flip()
+	for e in pygame.event.get():
+		if e.type == pygame.QUIT:
+			exit()
+		if e.type == pygame.KEYDOWN:
+			if e.key == pygame.K_RETURN:
+				return 4
+	clock.tick(10)
+	pygame.display.flip()

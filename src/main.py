@@ -2,7 +2,7 @@ import pygame
 from state import *
 
 class game:
-	def __init__(s):
+	def __init__(self):
 		pygame.init()
 		screen = pygame.display.set_mode((640,400),0,32)
 		clock = pygame.time.Clock()
