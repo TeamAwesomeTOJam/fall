@@ -51,8 +51,8 @@ class game(object):
         self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         
         # make a test gravity volume
-        g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
-        self.space.add_static(g.shape)
+#        g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
+#        self.space.add_static(g.shape)
 
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
