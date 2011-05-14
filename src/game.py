@@ -46,6 +46,11 @@ class game(object):
         #the player
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
+        #self.space.add(self.player.body_head, self.player.shape_head)
+        #pj = pm.PinJoint(self.player.body, self.player.body_head, (0,0), (0,0))
+        #self.space.add(pj)
+        #pj = pm.PinJoint(self.player.body, self.player.body_head, (10,0), (10,0))
+        #self.space.add(pj)
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -249,7 +254,9 @@ class game(object):
             self.player.idle()
         else:
             self.player.fly()
-            
+        
+        #if speed:
+         #   print 'go'
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
         self.player.body.angle = 0
@@ -289,14 +296,26 @@ class game(object):
 
         #Draw the player
         self.player.draw(screen)
-#        r = self.player.shape.radius
-#        v = self.player.shape.body.position
-#        rot = self.player.shape.body.rotation_vector
-#        p = self.world2screen(v)
-#        p2 = Vec2d(rot.x, -rot.y) * r
-#        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
-#        pygame.draw.line(screen, (255,0,0), p, p+p2)
-#        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
+        #r = self.player.shape.radius
+        #v = self.player.shape.body.position
+        #rot = self.player.shape.body.rotation_vector
+        #p = self.world2screen(v)
+        #p2 = Vec2d(rot.x, -rot.y) * r
+        #pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
+        #pygame.draw.line(screen, (255,0,0), p, p+p2)
+        #pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
+        points = self.player.shape.get_points()
+        flipped = map(self.world2screen,points)
+        pygame.draw.polygon(screen,(0,0,255),flipped,1)
+        
+        #r = self.player.shape_head.radius
+        #v = self.player.shape_head.body.position
+        #rot = self.player.shape_head.body.rotation_vector
+        #p = self.world2screen(v)
+        #p2 = Vec2d(rot.x, -rot.y) * r
+        #pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
+        #pygame.draw.line(screen, (255,0,0), p, p+p2)
+        #pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
         
         if self.mode_edit:
