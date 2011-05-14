@@ -73,7 +73,7 @@ class StickMan(object):
             self.frame_index = (self.frame_index + 1) % len(self.animation)
             self.next_frame = self.animation[self.frame_index]
     
-    def draw(self, selection=None):
+    def draw(self, editor=False, selection=None):
         ratio = self.frame_elapsed / self.animation.frame_duration
         i_frame = [pf * (1 - ratio) + nf * (ratio) for pf, nf in zip(self.prev_frame, self.next_frame)]
         
@@ -102,8 +102,15 @@ class StickMan(object):
                  (l_knee_pos, l_foot_pos),
                  (r_knee_pos, r_foot_pos)]
         for i, (start, end) in enumerate(lines):
-            if i == selection:
-                pygame.draw.line(surface, (255,0,0), start, end, self.width)
+            if editor:
+                if i == selection:
+                    pygame.draw.line(surface, (255,255,0), start, end, self.width)
+                elif i == 0:
+                    pygame.draw.line(surface, self.color, start, end, self.width)
+                elif i % 2: # odd limb, left side
+                    pygame.draw.line(surface, (0,255,0), start, end, self.width)
+                else: # even limb, right side
+                    pygame.draw.line(surface, (255,0,0), start, end, self.width)   
             else:
                 pygame.draw.line(surface, self.color, start, end, self.width)
         pygame.draw.circle(surface, self.color, head_pos, self.head_radius, self.width)
@@ -206,9 +213,9 @@ if __name__ == '__main__':
             sm.update(delta)
         
         screen.fill((0,0,0,255))
-        surf = sm.draw(selection=joint)
+        surf = sm.draw(editor=True, selection=joint)
         screen.blit(surf, (0,0))
-        screen.blit(font.render('Frame %s/%s' % (frame+1, len(sm.animation)), True, (255,255,255)), (128, 0))
+        screen.blit(font.render('Frame %s/%s' % (sm.frame_index+1, len(sm.animation)), True, (255,255,255)), (128, 0))
         screen.blit(font.render('Animation %s/%s' % (animation+1, len(sm.animations)), True, (255,255,255)), (128, 24))       
         pygame.display.flip()
 
