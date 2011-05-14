@@ -6,6 +6,7 @@ from pygame.locals import *
 from level import level
 from player import Player
 
+
 class game(object):
 
     def __init__(self):
@@ -223,6 +224,7 @@ class game(object):
         screen.fill((255,255,255))
 
         #Draw the player
+        self.player.draw(screen)
         r = self.player.shape.radius
         v = self.player.shape.body.position
         rot = self.player.shape.body.rotation_vector
@@ -237,12 +239,13 @@ class game(object):
             pos_snap=self.level.check_snap(self.pos_mouse,self.snap_radius)
             if pos_snap is not None:
                 pre_end=pos_snap
-                pygame.draw.circle(screen, (255,0,0) , self.world2screen(pos_snap),self.snap_radius,1)
+                pygame.draw.circle(screen, (255,0,0) , self.world2screen(pos_snap),int(self.snap_radius),1)
             else:
                 pre_end=self.pos_mouse
             #Draw mouse drag
             if self.pos_start is not None and self.pos_mouse is not None:
                 pygame.draw.line(screen, (0,0,0), self.world2screen(self.pos_start),self.world2screen(pre_end))
+
         #Draw other stuff
         for shape in self.on_screen:
             line = self.level.get_line(shape)

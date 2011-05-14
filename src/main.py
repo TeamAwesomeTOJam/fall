@@ -2,6 +2,7 @@ import pygame
 from state import *
 from settings import *
 from game import game
+from stickman import *
 
 def main():
     pygame.init()
