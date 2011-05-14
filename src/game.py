@@ -6,6 +6,7 @@ import pymunk as pm
 from pygame.locals import *
 from level import level
 from player import Player
+import gravityvolume
 
 
 class game(object):
@@ -41,11 +42,13 @@ class game(object):
         #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
-        self.space.gravity = Vec2d(0.0, -900.0)
+        self.space.gravity = Vec2d(0.0, 0.0)
         
         #the player
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
+        #gravitate
+        self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -55,7 +58,7 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
-        
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_DEFAULT, None, gravityvolume.handle_collision, None, None)
         
         self.level.load_level(self.level_path)
         for line in self.level.lines.iterkeys():
@@ -204,9 +207,13 @@ class game(object):
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
+                if e.button == 2:
+                    self.player.body.reset_forces()
             elif e.type == JOYBUTTONUP:
                 if e.button == 1:
                     self.jump = False
+                if e.button == 2:
+                    self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
 
         if self.mode_edit:
             self.pos_mouse=pygame.mouse.get_pos()
