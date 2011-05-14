@@ -13,15 +13,15 @@ class Player(object):
         
         self.body = pymunk.Body(PLAYER_MASS, 5)#pymunk.moment_for_circle(PLAYER_MASS, 0, PLAYER_RADIUS))
         self.body.position = pymunk.Vec2d(0, 0)
-        #self.shape = pymunk.Circle(self.body, PLAYER_RADIUS, (0,0))
-        #self.shape.friction = PLAYER_FRICTION
-        #self.shape.collision_type = COLLTYPE_PLAYER
+        self.shape = pymunk.Circle(self.body, PLAYER_RADIUS, (0,0))
+        self.shape.friction = PLAYER_FRICTION
+        self.shape.collision_type = COLLTYPE_PLAYER
         
         #pts = [(-10,0),(-20,10),(-20,200),(-10,210),(10,210),(20,200),(20,10),(10,0)]
-        pts = [(-20,-20), (-20,20), (20,20), (20,-20)]
-        self.shape = pymunk.Poly(self.body, pts, (0,0))
-        self.shape.friction = 1.0
-        self.shape.collision_type = COLLTYPE_PLAYER
+        #pts = [(-20,-20), (-20,20), (20,20), (20,-20)]
+        #self.shape = pymunk.Poly(self.body, pts, (0,0))
+        #self.shape.friction = PLAYER_FRICTION
+        #self.shape.collision_type = COLLTYPE_PLAYER
         
         #self.body_head = pymunk.Body(PLAYER_MASS, 5)
         #self.body_head.position = pymunk.Vec2d(0, 75)

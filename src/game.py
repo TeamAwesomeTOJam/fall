@@ -50,16 +50,17 @@ class game(object):
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
 
-        #self.space.add(self.player.body_head, self.player.shape_head)
-        #pj = pm.PinJoint(self.player.body, self.player.body_head, (0,0), (0,0))
-        #self.space.add(pj)
-        #pj = pm.PinJoint(self.player.body, self.player.body_head, (10,0), (10,0))
-        #self.space.add(pj)
 
+        #gravity polygons
+        self.mode_poly=False
+        self.poly_verts=[]
         #gravitate
         self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
-
         
+        # make a test gravity volume
+        #g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
+        #self.space.add_static(g.shape)
+
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
         self.screen_shape = None
@@ -68,7 +69,7 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
-        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_DEFAULT, None, gravityvolume.handle_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, gravityvolume.handle_collision, None, None)
         
         self.level.load_level(self.level_path)
         for line in self.level.lines.iterkeys():
@@ -130,16 +131,21 @@ class game(object):
             if e.type == pygame.QUIT:
                 exit()
             elif e.type == pygame.KEYDOWN:
-                if e.key == K_a:
-                    self.pan_left = True
-                elif e.key == K_d:
-                    self.pan_right = True
-                elif e.key == K_w:
-                    self.pan_up = True
-                elif e.key == K_s:
-                    self.pan_down = True
-                elif e.key == K_r:
-                    self.space.gravity = -1 * self.space.gravity
+                if self.mode_edit:
+                    if e.key == K_a:
+                        self.pan_left = True
+                    elif e.key == K_d:
+                        self.pan_right = True
+                    elif e.key == K_w:
+                        self.pan_up = True
+                    elif e.key == K_s:
+                        self.pan_down = True
+                    elif e.key == K_COMMA :
+                        self.dec_snap_radius= True
+                    elif e.key == K_PERIOD :
+                        self.inc_snap_radius = True
+                    elif e.key == K_k :
+                        self.level.save_level(self.level_path)
                 elif e.key == K_LEFT:
                     self.move_left = True
                 elif e.key == K_RIGHT:
@@ -148,49 +154,49 @@ class game(object):
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
-                elif e.key == K_e:
+                if e.key == K_e:
                     self.mode_edit = not self.mode_edit
-                elif e.key == K_COMMA and self.mode_edit:
-                    self.dec_snap_radius= True
-                elif e.key == K_PERIOD and self.mode_edit:
-                    self.inc_snap_radius = True
-                    '''
-                elif e.key == K_l and self.mode_edit:
-                    self.level.load_level(self.level_path)
-                    for line in self.level.lines.iterkeys():
-                        self.space.add_static(self.level.lines[line].shape)
-                        '''
-                elif e.key == K_k and self.mode_edit:
-                    self.level.save_level(self.level_path)
 
             elif e.type == pygame.KEYUP:
-                if e.key == K_a:
-                    self.pan_left = False
-                elif e.key == K_d:
-                    self.pan_right = False
-                elif e.key == K_w:
-                    self.pan_up = False
-                elif e.key == K_s:
-                    self.pan_down = False
+                if self.mode_edit:
+                    if e.key == K_a:
+                        self.pan_left = False
+                    elif e.key == K_d:
+                        self.pan_right = False
+                    elif e.key == K_w:
+                        self.pan_up = False
+                    elif e.key == K_s:
+                        self.pan_down = False
+                    elif e.key == K_COMMA :
+                        self.dec_snap_radius= False 
+                    elif e.key == K_PERIOD :
+                        self.inc_snap_radius = False
+                    elif e.key == K_p :
+                        if self.mode_poly:
+                            if self.poly_verts!=[]:
+                                level.add_poly(self.poly_verts)
+                                self.poly_verts=[]
+                        self.mode_poly = not self.mode_poly
                 elif e.key == K_LEFT:
                     self.move_left = False
                 elif e.key == K_RIGHT:
                     self.move_right = False
                 elif e.key == K_SPACE:
                     self.jump = False
-                elif e.key == K_COMMA and self.mode_edit:
-                    self.dec_snap_radius= False 
-                elif e.key == K_PERIOD and self.mode_edit:
-                    self.inc_snap_radius = False
-            elif e.type == pygame.MOUSEBUTTONDOWN:
-                if e.button == 1 and self.mode_edit:
+            elif e.type == pygame.MOUSEBUTTONDOWN and self.mode_edit:
+                if e.button == 1:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
-                        self.pos_start=pos_snap
+                        pos=pos_snap
                     else:
-                        self.pos_start=self.screen2world(e.pos)
-            elif e.type == pygame.MOUSEBUTTONUP:
-                if e.button == 1 and self.mode_edit:
+                        pos=self.screen2world(e.pos)
+                    if self.mode_poly:
+                        self.poly_vert.append(pos)
+                    else:
+                        self.pos_start=pos
+
+            elif e.type == pygame.MOUSEBUTTONUP and self.mode_edit:
+                if e.button == 1:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
                         self.pos_end=pos_snap
@@ -276,9 +282,7 @@ class game(object):
             self.player.idle()
         else:
             self.player.fly()
-        
-        #if speed:
-         #   print 'go'
+            
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
         self.player.body.angle = 0
@@ -303,7 +307,7 @@ class game(object):
         self.physics(time)
         
         if not self.mode_edit:
-            self.camera_pos = self.player.body.position
+            self.camera_pos = Vec2d(self.player.body.position)
         
         self.draw(screen)
         return 1
@@ -318,26 +322,14 @@ class game(object):
 
         #Draw the player
         self.player.draw(screen)
-        #r = self.player.shape.radius
-        #v = self.player.shape.body.position
-        #rot = self.player.shape.body.rotation_vector
-        #p = self.world2screen(v)
-        #p2 = Vec2d(rot.x, -rot.y) * r
-        #pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
-        #pygame.draw.line(screen, (255,0,0), p, p+p2)
-        #pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
-        points = self.player.shape.get_points()
-        flipped = map(self.world2screen,points)
-        pygame.draw.polygon(screen,(0,0,255),flipped,1)
-        
-        #r = self.player.shape_head.radius
-        #v = self.player.shape_head.body.position
-        #rot = self.player.shape_head.body.rotation_vector
-        #p = self.world2screen(v)
-        #p2 = Vec2d(rot.x, -rot.y) * r
-        #pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
-        #pygame.draw.line(screen, (255,0,0), p, p+p2)
-        #pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
+#        r = self.player.shape.radius
+#        v = self.player.shape.body.position
+#        rot = self.player.shape.body.rotation_vector
+#        p = self.world2screen(v)
+#        p2 = Vec2d(rot.x, -rot.y) * r
+#        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
+#        pygame.draw.line(screen, (255,0,0), p, p+p2)
+#        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
         
         if self.mode_edit:
