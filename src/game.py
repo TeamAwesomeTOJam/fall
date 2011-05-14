@@ -106,8 +106,7 @@ class game(object):
             if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
                 return True
         return False
-        
-    
+
     def handle_input(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -208,6 +207,9 @@ class game(object):
             self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
             self.jump_time -= time
         
+        if speed and self.on_ground():
+            self.player.walk()
+            print 'walk'
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
         self.player.body.angle = 0

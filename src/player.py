@@ -16,15 +16,29 @@ class Player(object):
         self.shape.friction = PLAYER_FRICTION
         self.shape.collision_type = COLLTYPE_PLAYER
         self.model = StickMan(os.path.join(RES, 'animations.pickle'))
-        self.model.set_default_animation(1)
+        self.model.set_default_animation(0)
+        self.dir = 1
     
     def update(self, dt):
         self.model.update(dt)
+    
+    def walk(self):
+        self.model.set_default_animation(1)
+    
+    def idle(self):
+        self.model.set_default_animation(0)
+    
+    def jump(self):
+        pass
         
     def draw(self, screen):
         surf = self.model.draw()
         #print self.body.velocity
-        if self.body.velocity.x < 0:
+        if self.body.velocity.x < -20:
+            self.dir = -1
+        elif self.body.velocity.x > 20:
+            self.dir = 1
+        if self.dir == -1:
             surf = pygame.transform.flip(surf, True, False)
         x, y = self.game.world2screen(self.body.position)
         x -= surf.get_width() / 2.0
