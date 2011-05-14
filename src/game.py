@@ -38,7 +38,7 @@ class game(object):
         self.level_path=os.path.join(RES, 'level.pickle')
         self.level = level()
         
-        #PHYICS!!!!
+        #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
         self.space.gravity = Vec2d(0.0, -900.0)
