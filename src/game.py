@@ -6,6 +6,7 @@ import pymunk as pm
 from pygame.locals import *
 from level import level
 from player import Player
+import gravityvolume
 
 
 class game(object):
@@ -41,16 +42,21 @@ class game(object):
         #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
-        self.space.gravity = Vec2d(0.0, -900.0)
+        self.space.gravity = Vec2d(0.0, 0.0)
         
         #the player
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
+
         #self.space.add(self.player.body_head, self.player.shape_head)
         #pj = pm.PinJoint(self.player.body, self.player.body_head, (0,0), (0,0))
         #self.space.add(pj)
         #pj = pm.PinJoint(self.player.body, self.player.body_head, (10,0), (10,0))
         #self.space.add(pj)
+
+        #gravitate
+        self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
+
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -60,7 +66,7 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
-        
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_DEFAULT, None, gravityvolume.handle_collision, None, None)
         
         self.level.load_level(self.level_path)
         for line in self.level.lines.iterkeys():
@@ -197,11 +203,25 @@ class game(object):
                     self.move_right = True
                 elif x == -1:
                     self.move_left = True
+            elif e.type == JOYAXISMOTION:
+                if e.axis == 0:
+                    if e.value < DEADZONE and e.value > -DEADZONE:
+                        self.move_left = False
+                        self.move_right = False
+                    elif e.value >= DEADZONE:
+                        self.move_right = True
+                    elif e.value <= -DEADZONE:
+                        self.move_left = True
             elif e.type == JOYBUTTONDOWN:
                 if e.button == 1 and self.on_ground():
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
+                if e.button == 2:
+                    self.player.body.reset_forces()
+                if e.button == 3:
+                    self.player.body.reset_forces()                   
+                    self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
             elif e.type == JOYBUTTONUP:
                 if e.button == 1:
                     self.jump = False
