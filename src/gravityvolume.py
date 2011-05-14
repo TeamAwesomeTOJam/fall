@@ -24,6 +24,6 @@ def handle_collision(space, arbiter):
     volume, shape = arbiter.shapes
     body = shape.body
     body.reset_forces()
-    body.apply_force(volume.g)
+    body.apply_force(volume.g * body.mass)
     return False
         

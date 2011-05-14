@@ -209,11 +209,12 @@ class game(object):
                     self.player.jump()
                 if e.button == 2:
                     self.player.body.reset_forces()
+                if e.button == 3:
+                    self.player.body.reset_forces()                   
+                    self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
             elif e.type == JOYBUTTONUP:
                 if e.button == 1:
                     self.jump = False
-                if e.button == 2:
-                    self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
 
         if self.mode_edit:
             self.pos_mouse=pygame.mouse.get_pos()
