@@ -4,6 +4,7 @@ from pymunk import Vec2d
 import pymunk as pm
 from pygame.locals import *
 from level import level
+from player import Player
 
 class game(object):
 
@@ -42,12 +43,8 @@ class game(object):
         self.space.gravity = Vec2d(0.0, -900.0)
         
         #the player
-        self.player_body = pm.Body(PLAYER_MASS, pm.moment_for_circle(PLAYER_MASS, 0 ,PLAYER_RADIUS))
-        self.player_body.position = Vec2d(0,0)
-        self.player_shape = pm.Circle(self.player_body, PLAYER_RADIUS, (0,0))
-        self.player_shape.friction = PLAYER_FRICTION
-        self.player_shape.collision_type = COLLTYPE_PLAYER
-        self.space.add(self.player_body, self.player_shape)
+        self.player = Player(self)
+        self.space.add(self.player.body, self.player.shape)
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -186,11 +183,12 @@ class game(object):
         if self.move_right:
             speed += PLAYER_SPEED
         
-        self.player_body.velocity = Vec2d(speed,self.player_body.velocity[1])
+        self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
-        self.player_body.angle = 0
-        self.player_body.angular_velocity = 0
-
+        self.player.body.angle = 0
+        self.player.body.angular_velocity = 0
+        
+        self.player.update(time)
         self.physics(time)
         self.draw(screen)
         return 1
@@ -204,9 +202,9 @@ class game(object):
         screen.fill((255,255,255))
 
         #Draw the player
-        r = self.player_shape.radius
-        v = self.player_shape.body.position
-        rot = self.player_shape.body.rotation_vector
+        r = self.player.shape.radius
+        v = self.player.shape.body.position
+        rot = self.player.shape.body.rotation_vector
         p = self.world2screen(v)
         p2 = Vec2d(rot.x, -rot.y) * r
         pygame.draw.circle(screen, (0,0,255), p, int(r), 2)

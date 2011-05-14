@@ -148,7 +148,7 @@ class Animation(object):
             self.frames = frames
         else:
             self.frames = [[-math.pi*0.5, -math.pi*0.5, math.pi*0.5, 1, -1,  -math.pi * 1.25, -math.pi * 1.75, 0, 0, 80]]
-        repeat = False
+        self.repeat = False
     
     def __len__(self):
         return len(self.frames)
