@@ -127,6 +127,7 @@ class game(object):
                 elif e.key == K_SPACE and self.on_ground():
                     self.jump = True
                     self.jump_time = JUMP_TIME
+                    self.player.jump()
                 elif e.key == K_COMMA and self.mode_edit:
                     self.dec_snap_radius= True
                 elif e.key == K_PERIOD and self.mode_edit:
@@ -209,7 +210,11 @@ class game(object):
         
         if speed and self.on_ground():
             self.player.walk()
-            print 'walk'
+        elif self.on_ground():
+            self.player.idle()
+        else:
+            self.player.fly()
+            
         self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
             
         self.player.body.angle = 0

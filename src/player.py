@@ -28,8 +28,11 @@ class Player(object):
     def idle(self):
         self.model.set_default_animation(0)
     
+    def fly(self):
+        self.model.set_default_animation(3)
+    
     def jump(self):
-        pass
+        self.model.play_animation(2)
         
     def draw(self, screen):
         surf = self.model.draw()
