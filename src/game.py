@@ -30,6 +30,8 @@ class game(object):
 
         #Editor events
         self.mode_edit=False
+        self.cmd_x=0
+        self.cmd_y=0
         self.pos_start=None
         self.pos_end=None
         self.pos_mouse=None
@@ -47,6 +49,11 @@ class game(object):
         #the player
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
+
+
+        #gravity polygons
+        self.mode_poly=False
+        self.poly_verts=[]
         #gravitate
         self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         
@@ -124,14 +131,21 @@ class game(object):
             if e.type == pygame.QUIT:
                 exit()
             elif e.type == pygame.KEYDOWN:
-                if e.key == K_a:
-                    self.pan_left = True
-                elif e.key == K_d:
-                    self.pan_right = True
-                elif e.key == K_w:
-                    self.pan_up = True
-                elif e.key == K_s:
-                    self.pan_down = True
+                if self.mode_edit:
+                    if e.key == K_a:
+                        self.pan_left = True
+                    elif e.key == K_d:
+                        self.pan_right = True
+                    elif e.key == K_w:
+                        self.pan_up = True
+                    elif e.key == K_s:
+                        self.pan_down = True
+                    elif e.key == K_COMMA :
+                        self.dec_snap_radius= True
+                    elif e.key == K_PERIOD :
+                        self.inc_snap_radius = True
+                    elif e.key == K_k :
+                        self.level.save_level(self.level_path)
                 elif e.key == K_LEFT:
                     self.move_left = True
                 elif e.key == K_RIGHT:
@@ -140,49 +154,49 @@ class game(object):
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
-                elif e.key == K_e:
+                if e.key == K_e:
                     self.mode_edit = not self.mode_edit
-                elif e.key == K_COMMA and self.mode_edit:
-                    self.dec_snap_radius= True
-                elif e.key == K_PERIOD and self.mode_edit:
-                    self.inc_snap_radius = True
-                    '''
-                elif e.key == K_l and self.mode_edit:
-                    self.level.load_level(self.level_path)
-                    for line in self.level.lines.iterkeys():
-                        self.space.add_static(self.level.lines[line].shape)
-                        '''
-                elif e.key == K_k and self.mode_edit:
-                    self.level.save_level(self.level_path)
 
             elif e.type == pygame.KEYUP:
-                if e.key == K_a:
-                    self.pan_left = False
-                elif e.key == K_d:
-                    self.pan_right = False
-                elif e.key == K_w:
-                    self.pan_up = False
-                elif e.key == K_s:
-                    self.pan_down = False
+                if self.mode_edit:
+                    if e.key == K_a:
+                        self.pan_left = False
+                    elif e.key == K_d:
+                        self.pan_right = False
+                    elif e.key == K_w:
+                        self.pan_up = False
+                    elif e.key == K_s:
+                        self.pan_down = False
+                    elif e.key == K_COMMA :
+                        self.dec_snap_radius= False 
+                    elif e.key == K_PERIOD :
+                        self.inc_snap_radius = False
+                    elif e.key == K_p :
+                        if self.mode_poly:
+                            if self.poly_verts!=[]:
+                                level.add_poly(self.poly_verts)
+                                self.poly_verts=[]
+                        self.mode_poly = not self.mode_poly
                 elif e.key == K_LEFT:
                     self.move_left = False
                 elif e.key == K_RIGHT:
                     self.move_right = False
                 elif e.key == K_SPACE:
                     self.jump = False
-                elif e.key == K_COMMA and self.mode_edit:
-                    self.dec_snap_radius= False 
-                elif e.key == K_PERIOD and self.mode_edit:
-                    self.inc_snap_radius = False
-            elif e.type == pygame.MOUSEBUTTONDOWN:
-                if e.button == 1 and self.mode_edit:
+            elif e.type == pygame.MOUSEBUTTONDOWN and self.mode_edit:
+                if e.button == 1:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
-                        self.pos_start=pos_snap
+                        pos=pos_snap
                     else:
-                        self.pos_start=self.screen2world(e.pos)
-            elif e.type == pygame.MOUSEBUTTONUP:
-                if e.button == 1 and self.mode_edit:
+                        pos=self.screen2world(e.pos)
+                    if self.mode_poly:
+                        self.poly_vert.append(pos)
+                    else:
+                        self.pos_start=pos
+
+            elif e.type == pygame.MOUSEBUTTONUP and self.mode_edit:
+                if e.button == 1:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
                         self.pos_end=pos_snap
@@ -293,7 +307,7 @@ class game(object):
         self.physics(time)
         
         if not self.mode_edit:
-            self.camera_pos = self.player.body.position
+            self.camera_pos = Vec2d(self.player.body.position)
         
         self.draw(screen)
         return 1
@@ -328,6 +342,15 @@ class game(object):
             #Draw mouse drag
             if self.pos_start is not None and self.pos_mouse is not None:
                 pygame.draw.line(screen, (0,0,0), self.world2screen(self.pos_start),self.world2screen(pre_end))
+            #draw edit osd
+            cmds = ["Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
+                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,"]
+            font = pygame.font.SysFont('helvetica',14)
+            for i in xrange(len(cmds)):
+                cmd=cmds[i]
+                surf=font.render(cmd,True,(40,40,40))
+                screen.blit(surf,(self.cmd_x,self.cmd_y+i*surf.get_height()))
+
 
         #Draw other stuff
         for shape in self.on_screen:

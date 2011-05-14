@@ -6,7 +6,7 @@ from stickman import *
 
 def main():
     pygame.init()
-    if pygame.joystick.get_count > 0:
+    if pygame.joystick.get_count() > 0:
         pygame.joystick.Joystick(0).init()
     screen = pygame.display.set_mode((WIDTH,HEIGHT),0,32)
     clock = pygame.time.Clock()
