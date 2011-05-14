@@ -97,9 +97,8 @@ class game(object):
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
     
     def on_ground(self):
+        pass
         
-        
-    
     def handle_input(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
