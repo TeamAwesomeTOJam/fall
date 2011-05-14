@@ -5,7 +5,7 @@ import pickle
 import pygame
 from pygame.locals import *
 
-import config
+import settings
 
 SPINE = 0
 L_SHOULDER = 1
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     pygame.key.set_repeat(500, 100)
     screen = pygame.display.set_mode((256, 128))
     font = pygame.font.Font(None, 24)
-    sm = StickMan(os.path.join(config.resource_path, 'animations.pickle'))
+    sm = StickMan(os.path.join(settings.RES, 'animations.pickle'))
     joint = 0
     frame = 0
     animation = 0
