@@ -42,6 +42,8 @@ class game(object):
         self.screen_shape = None
         self.set_screen_shape()
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
+        
+        
     
         #self.level = 
         
@@ -58,6 +60,7 @@ class game(object):
     def collide_screen(self, space, arbiter):
         s1,s2 = arbiter.shapes
         self.on_screen.append(s2)
+        return False
 
     def world2screen(self,v):
         x,y = v
@@ -65,7 +68,7 @@ class game(object):
         h = HEIGHT
         rx = self.camera_pos.x
         ry = self.camera_pos.y
-        return ((x-rx)+w/2,-1*(y-ry)+h/2)
+        return (int((x-rx)+w/2), int(-1*(y-ry)+h/2))
         
     def screen2world(self,v):
         x,y = v
@@ -134,8 +137,13 @@ class game(object):
             if self.snap_radius<0: self.snap_radius=0
         if self.inc_snap_radius:
             self.snap_radius+=1
+            
         if self.pos_start is not None and self.pos_end is not None:
-            self.level.add_line(self.pos_start,self.pos_end)
+            body = pm.Body(pm.inf, pm.inf)
+            shape = pm.Segment(body, self.pos_start, self.pos_end, 0.0)
+            shape.friction = 1.0
+            self.space.add_static(shape)
+            self.level.add_line(self.pos_start,self.pos_end,shape)
             self.pos_start = None
             self.pos_end= None
 
@@ -146,8 +154,6 @@ class game(object):
     def physics(self,time):
         self.set_screen_shape()
         self.space.step(time)
-        
-        
     
     def draw(self,screen):
         screen.fill((255,255,255))
@@ -156,7 +162,8 @@ class game(object):
         if self.pos_start is not None and self.pos_mouse is not None:
             pygame.draw.line(screen, (180,180,180), self.world2screen(self.pos_start),self.world2screen(self.pos_mouse))
         #Draw other stuff
-        for line in self.level.lines:
+        for shape in self.on_screen:
+            line = self.level.get_line(shape)
             pygame.draw.line(screen, (180,180,180), self.world2screen(line.start),self.world2screen(line.end))
 
         pygame.display.flip()
