@@ -29,7 +29,7 @@ class Player(object):
         self.model.set_default_animation(0)
     
     def fly(self):
-        self.model.set_default_animation(3)
+        self.model.set_default_animation(5)
     
     def jump(self):
         self.model.play_animation(2)

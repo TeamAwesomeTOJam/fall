@@ -281,14 +281,14 @@ class game(object):
 
         #Draw the player
         self.player.draw(screen)
-        r = self.player.shape.radius
-        v = self.player.shape.body.position
-        rot = self.player.shape.body.rotation_vector
-        p = self.world2screen(v)
-        p2 = Vec2d(rot.x, -rot.y) * r
-        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
-        pygame.draw.line(screen, (255,0,0), p, p+p2)
-        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
+#        r = self.player.shape.radius
+#        v = self.player.shape.body.position
+#        rot = self.player.shape.body.rotation_vector
+#        p = self.world2screen(v)
+#        p2 = Vec2d(rot.x, -rot.y) * r
+#        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
+#        pygame.draw.line(screen, (255,0,0), p, p+p2)
+#        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
         
         if self.mode_edit:
