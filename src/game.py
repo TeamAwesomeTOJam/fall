@@ -1,6 +1,7 @@
 from settings import *
 import pygame
 from pymunk import Vec2d
+import pymunk as pm
 from pygame.locals import *
 #from level import level
 
@@ -13,6 +14,12 @@ class game(object):
         self.pan_right = False
         self.pan_up = False
         self.pan_down = False
+        
+        #PHYICS!!!!
+        pm.init_pymunk()
+        self.space = pm.Space()
+        self.space.gravity = Vec2d(0.0, -900.0)
+    
         #self.level = 
 
     def world2screen(self,v):
@@ -70,7 +77,7 @@ class game(object):
         return 1
     
     def draw(self,screen):
-        screen.fill((0,0,0))
+        screen.fill((255,255,255))
         pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         pygame.display.flip()
         

@@ -12,16 +12,15 @@ def attract(screen,clock):
 			((width-press.get_width())*.5,height*.5-press.get_height()))
 	screen.blit(start,\
 			((width-start.get_width())*.5,height*.5))
-	waiting = True
-	while waiting:
-		for e in pygame.event.get():
-			if e.type == pygame.QUIT:
-				exit()
-			if e.type == pygame.KEYDOWN:
-				if e.key == pygame.K_RETURN:
-					return 1
-		clock.tick(10)
-		pygame.display.flip()
+	for e in pygame.event.get():
+		if e.type == pygame.QUIT:
+			exit()
+		if e.type == pygame.KEYDOWN:
+			if e.key == pygame.K_RETURN:
+				return 1
+	clock.tick(10)
+	pygame.display.flip()
+	return 0
 
 
 def play_game(screen,clock):
