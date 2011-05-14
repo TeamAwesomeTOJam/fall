@@ -50,6 +50,10 @@ class game(object):
         #gravitate
         self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         
+        # make a test gravity volume
+        g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
+        self.space.add_static(g.shape)
+
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
         self.screen_shape = None
@@ -58,7 +62,7 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
-        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_DEFAULT, None, gravityvolume.handle_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, gravityvolume.handle_collision, None, None)
         
         self.level.load_level(self.level_path)
         for line in self.level.lines.iterkeys():
