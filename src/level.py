@@ -10,8 +10,8 @@ from gravityvolume import *
 class Line(object):
     
     def __init__(self, start, end, shape, lethal=False):
-        self.start = start
-        self.end = end
+        self.start = (start[0], start[1])
+        self.end = (end[0], end[1])
         self.shape = shape
         self.lethal = lethal
         if lethal:
