@@ -16,8 +16,9 @@ class Player(object):
         
         self.body = pymunk.Body(PLAYER_MASS, pymunk.inf)#pymunk.moment_for_circle(PLAYER_MASS, 0, PLAYER_RADIUS))
         
-        pts = [(-10,-20),(-20,0),(-20,70),(-10,80),(10,80),(20,70),(20,0),(10,-20)]
-        self.shape = pymunk.Poly(self.body, pts, (0,0))
+        self.pts = [(-10,-50),(-20,-30),(-20,40),(-10,50),(10,50),(20,40),(20,-30),(10,-50)]
+        #pts = [(-10,-20),(-20,0),(-20,70),(-10,80),(10,80),(20,70),(20,0),(10,-20)]
+        self.shape = pymunk.Poly(self.body, self.pts, (0,0))
         self.shape.friction = PLAYER_FRICTION
         self.shape.collision_type = COLLTYPE_PLAYER
         
@@ -51,7 +52,8 @@ class Player(object):
         if self.dir == -1:
             surf = pygame.transform.flip(surf, True, False)
         
-        diff = Vec2d(0,-1*surf.get_height() / 2.0 + 28)
+        #diff = Vec2d(0,-1*surf.get_height() / 2.0 + 28)
+        diff = Vec2d(0,-1*surf.get_height() / 2.0 + 58)
         diff.rotate(-1*self.game.player.body.force.rotated(math.pi/2.0).get_angle())
         center = self.game.world2screen(self.body.position) + diff
         

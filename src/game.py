@@ -147,7 +147,7 @@ class game(object):
             #p = self.player.shape.body.position
             #a = (c - p).get_angle_degrees()
             #if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
-            if abs(body_loc.y + 20) < 3:
+            if abs(body_loc.y - self.player.pts[0][1]) < 3:
                 self.last_on_ground = DOWN_HILL_GRACE
                 return True
         return False
@@ -297,10 +297,10 @@ class game(object):
             #a = (c - p).get_angle_degrees()
             #print a
             #if abs((a % 360) - 180) < PLAYER_WALL_COLLISION_ANGLE:
-            if abs(body_loc.x + 20) < 3:
+            if abs(body_loc.x - self.player.pts[1][0]) < 3:
                 allow_left = False
             #if abs(a) < PLAYER_WALL_COLLISION_ANGLE:
-            if abs(body_loc.x - 20) < 3:
+            if abs(body_loc.x - self.player.pts[-2][0]) < 3:
                 allow_right = False
             
         #control the player
