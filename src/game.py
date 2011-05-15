@@ -40,6 +40,7 @@ class Game(object):
         
         #Editor events
         self.mode_edit=False
+        self.del_mode=False
         self.cmd_x=0
         self.cmd_y=0
         self.pos_start=None
@@ -85,7 +86,16 @@ class Game(object):
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
         self.shape_map[self.player.shape] = self.player
+
+        #the mouse
+        self.mouse_body=pm.Body(pm.inf,pm.inf)
+        mouse_shape=pm.Circle(self.mouse_body,3,Vec2d(0,0))
+        mouse_shape.collision_type=COLLTYPE_MOUSE
+        self.space.add(self.mouse_body,mouse_shape)
         
+        self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_MOUSE, self.del_line,None,None,None)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_MOUSE, self.del_gvol,None,None,None)
+        self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_MOUSE, self.del_line,None,None,None)
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
         self.screen_shape = None
@@ -148,6 +158,26 @@ class Game(object):
         body.apply_force((gvol.g[0] * body.mass, gvol.g[1] * body.mass))
         return False
 
+    def del_line(self, space, arbiter):
+        if self.del_mode:
+            line_shape,mouse=arbiter.shapes
+            line = self.shape_map[line_shape]
+            self.level.dec_or_del(line.start)
+            self.level.dec_or_del(line.end)
+            del self.shape_map[line_shape]
+            self.space.remove_static(line_shape)
+        return False 
+
+    def del_gvol(self, space, arbiter):
+        if self.del_mode:
+            gvol_shape,mouse=arbiter.shapes
+            gvol = self.shape_map[gvol_shape]
+            for m in gvol.vertices:
+                self.level.dec_or_del(m)
+            del self.shape_map[gvol_shape]
+            self.space.remove_static(gvol_shape)
+        return False 
+
     def world2screen(self,v):
         x,y = v
         w = WIDTH
@@ -207,6 +237,8 @@ class Game(object):
                         self.inc_snap_radius = True
                     elif e.key == K_k :
                         self.level.save_level(self.level_path)
+                    elif e.key == K_x :
+                        self.del_mode=not self.del_mode
                     elif e.key == K_RETURN and self.mode_gvol:
                         self.mode_grav_vec = not self.mode_grav_vec
                         self.pos_start=None
@@ -319,7 +351,9 @@ class Game(object):
 
         if self.mode_edit:
             self.pos_mouse=pygame.mouse.get_pos()
-            if self.pos_mouse is not None: self.pos_mouse=self.screen2world(self.pos_mouse)
+            if self.pos_mouse is not None:
+                self.pos_mouse=self.screen2world(self.pos_mouse)
+                self.mouse_body.position=self.pos_mouse
 
 
     def tick(self,screen,clock):
@@ -505,11 +539,13 @@ class Game(object):
                 pygame.draw.line(screen, (255,255,255), self.world2screen(self.pos_start),self.world2screen(pre_end))
             #draw edit osd
             cmds = ["Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
-                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Polygon mode: p"]
+                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Gravity Volume Mode: G", "Delete Mode: X"]
             if self.mode_gvol:
                 cmds.append("Gravity Volume Mode ENABLED")
-                if self.mode_grav_vec: cmds.append("Draw Gravity Vector")
-                else: cmds.append("Draw Gravity Polygon")
+                if self.mode_grav_vec: cmds.append("Draw Gravity Vector: MOUSE1 drag")
+                else: cmds.append("Draw Gravity Polygon: MOUSE1 click vertices")
+            if self.del_mode:
+                cmds.append("DELETE MODE: MOUSEOVER KILLS")
             font = pygame.font.SysFont('helvetica',14)
             for i in xrange(len(self.poly_verts)):
                 pygame.draw.line(screen, (0,0,255), \
