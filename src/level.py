@@ -30,12 +30,10 @@ class level():
             self.areas=[]
             self.enemies=[]
             self.snaps={}
+            self.gvols={}
         else:
             self.load_level()
                 
-
-
-
     def load_level(self,path):
         try:
             infile = open(path, 'rb')
@@ -71,6 +69,9 @@ class level():
         self.lines[shape] = line(start, end, shape,prop)
         self.add_or_inc(self.snaps,(start[0],start[1]))
         self.add_or_inc(self.snaps,(end[0],end[1]))
+
+    def add_gvol(self,vert_list,grav):
+        print vert_list, grav
 
     def resnap(self):
         self.snaps={}

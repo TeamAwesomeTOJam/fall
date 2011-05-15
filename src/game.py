@@ -52,7 +52,9 @@ class game(object):
 
 
         #gravity polygons
-        self.mode_poly=False
+        self.mode_gvol=False
+        self.mode_grav_vec=False
+        self.grav_set=False
         self.poly_verts=[]
         #gravitate
         self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
@@ -131,7 +133,9 @@ class game(object):
             if e.type == pygame.QUIT:
                 exit()
             elif e.type == pygame.KEYDOWN:
-                if self.mode_edit:
+                if e.key == K_e:
+                    self.mode_edit = not self.mode_edit
+                elif self.mode_edit:
                     if e.key == K_a:
                         self.pan_left = True
                     elif e.key == K_d:
@@ -146,6 +150,15 @@ class game(object):
                         self.inc_snap_radius = True
                     elif e.key == K_k :
                         self.level.save_level(self.level_path)
+                    elif e.key == K_RETURN and self.mode_gvol:
+                        self.mode_grav_vec = not self.mode_grav_vec
+                    elif e.key == K_g :
+                        if self.mode_gvol:#stopping gravity volume
+                            self.grav_set=True
+                        else: #starting gravity volume
+                            self.mode_grav_vec=False
+
+                        self.mode_gvol = not self.mode_gvol
                 elif e.key == K_LEFT:
                     self.move_left = True
                 elif e.key == K_RIGHT:
@@ -154,8 +167,6 @@ class game(object):
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
-                if e.key == K_e:
-                    self.mode_edit = not self.mode_edit
 
             elif e.type == pygame.KEYUP:
                 if self.mode_edit:
@@ -171,12 +182,6 @@ class game(object):
                         self.dec_snap_radius= False 
                     elif e.key == K_PERIOD :
                         self.inc_snap_radius = False
-                    elif e.key == K_p :
-                        if self.mode_poly:
-                            if self.poly_verts!=[]:
-                                level.add_poly(self.poly_verts)
-                                self.poly_verts=[]
-                        self.mode_poly = not self.mode_poly
                 elif e.key == K_LEFT:
                     self.move_left = False
                 elif e.key == K_RIGHT:
@@ -185,23 +190,22 @@ class game(object):
                     self.jump = False
             elif e.type == pygame.MOUSEBUTTONDOWN and self.mode_edit:
                 if e.button == 1:
+
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
                         pos=pos_snap
                     else:
                         pos=self.screen2world(e.pos)
-                    if self.mode_poly:
-                        self.poly_vert.append(pos)
-                    else:
-                        self.pos_start=pos
+                    self.pos_start=pos
 
             elif e.type == pygame.MOUSEBUTTONUP and self.mode_edit:
                 if e.button == 1:
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
-                        self.pos_end=pos_snap
+                        pos=pos_snap
                     else:
-                        self.pos_end=self.screen2world(e.pos)
+                        pos=self.screen2world(e.pos)
+                    self.pos_end=pos
             elif e.type == JOYHATMOTION:
                 x, y = e.value
                 if x == 0:
@@ -294,7 +298,20 @@ class game(object):
                 if self.snap_radius<1: self.snap_radius=1
             if self.inc_snap_radius:
                 self.snap_radius+=1
-            if self.pos_start is not None and self.pos_end is not None:
+            if self.grav_set:#doing gravity volume stuff
+                
+                if self.mode_gvol:
+                    if self.mode_grav_vec and self.pos_start is not None and self.pos_end is not None:
+                        self.mode_grav_vec = (self.pos_end[0]-self.pos_start[0], self.pos_end[1]-self.pos_start[1])
+                    else:
+                        self.poly_verts.append(pos)
+                if self.mode_grav_vec is not None and self.poly_verts!=[]:
+                    self.level.add_gvol(self.poly_verts,self.mode_grav_vec)
+                else:
+                    self.poly_verts=[]
+                    self.mode_grav_vec=False
+                self.grav_set=False
+            elif self.pos_start is not None and self.pos_end is not None:
                 body = pm.Body(pm.inf, pm.inf)
                 shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
                 shape.friction = 1.0
@@ -344,7 +361,11 @@ class game(object):
                 pygame.draw.line(screen, (0,0,0), self.world2screen(self.pos_start),self.world2screen(pre_end))
             #draw edit osd
             cmds = ["Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
-                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,"]
+                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Polygon mode: p"]
+            if self.mode_gvol:
+                cmds.append("Gravity Volume Mode ENABLED")
+                if self.mode_grav_vec: cmds.append("Draw Gravity Vector")
+                else: cmds.append("Draw Gravity Polygon")
             font = pygame.font.SysFont('helvetica',14)
             for i in xrange(len(cmds)):
                 cmd=cmds[i]
