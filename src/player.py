@@ -26,6 +26,10 @@ class Player(object):
         self.model.set_default_animation(0)
         self.dir = 1
         
+        self.jump_sound = pygame.mixer.Sound(os.path.join(RES, 'jump.ogg'))
+        self.land_sound = pygame.mixer.Sound(os.path.join(RES, 'land.ogg'))
+        self.gravity_sound = pygame.mixer.Sound(os.path.join(RES, 'gravity.ogg'))
+        
         self.collisions = []
         self.last_on_ground = 0
         self.gravity_set = False
@@ -43,6 +47,7 @@ class Player(object):
         self.model.set_default_animation(5)
     
     def jump(self):
+        self.jump_sound.play()
         self.model.play_animation(2)
     
         
