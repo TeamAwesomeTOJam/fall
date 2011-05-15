@@ -305,9 +305,13 @@ class game(object):
             
         #control the player
         speed = 0
-        if self.move_left and allow_left:
+        if abs(Vec2d(0,-1).get_angle_between(self.player.body.force)) > math.pi/2.0:
+            m_left, m_right = self.move_right, self.move_left
+        else:
+            m_left, m_right = self.move_left, self.move_right
+        if m_left and allow_left:
             speed -= PLAYER_SPEED
-        if self.move_right and allow_right:
+        if m_right and allow_right:
             speed += PLAYER_SPEED
         
         if self.jump and self.jump_time > 0:
