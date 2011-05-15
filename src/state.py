@@ -65,9 +65,9 @@ def game_over(screen,clock):
         if e.type == pygame.QUIT:
             exit()
         if e.type == pygame.KEYDOWN:
-            if e.key == pygame.K_n:
+            if e.key == pygame.K_ESCAPE:
                 return 0
-            if e.key == pygame.K_r:
+            if e.key == pygame.K_RETURN:
                 return 1
     clock.tick(10)
     pygame.display.flip()
