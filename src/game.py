@@ -72,7 +72,7 @@ class game(object):
         self.grav_vec=None
         self.poly_verts=[]
         #gravitate
-        self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass).rotated(math.pi/4))
+        self.gravity_set = False
         
         # make a test gravity volume
 #        g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
@@ -89,7 +89,7 @@ class game(object):
         
         self.space.set_default_collision_handler(None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
-        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, gravityvolume.handle_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, self.hit_and_gravity_volume, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, gravityvolume.handle_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
@@ -110,6 +110,11 @@ class game(object):
         elif s2 == self.screen_shape:
             self.on_screen.append(s1)
         return False
+    
+    def hit_and_gravity_volume(self, space, arbiter):
+        self.gravity_set = True
+        return gravityvolume.handle_collision(space, arbiter)
+        
     
     def collect_player_collisions(self, space, arbiter):
         for c in arbiter.contacts:
@@ -304,6 +309,10 @@ class game(object):
                 allow_right = False
             
         #control the player
+        
+        if not self.gravity_set:
+            self.player.body.reset_forces()
+            self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         speed = 0
         if abs(Vec2d(0,-1).get_angle_between(self.player.body.force)) > math.pi/2.0:
             m_left, m_right = self.move_right, self.move_left
@@ -315,7 +324,7 @@ class game(object):
             speed += PLAYER_SPEED
         
         if self.jump and self.jump_time > 0:
-            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME).rotated(self.player.body.force.angle + math.pi/2))
+            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
             self.jump_time -= time
         
         if self.last_on_ground > 0:
@@ -401,6 +410,7 @@ class game(object):
     def physics(self,time):
         self.set_screen_shape()
         self.player_collisions = []
+        self.gravity_set = False
         self.space.step(time)
     
     def draw(self,screen):
