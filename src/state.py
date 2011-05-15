@@ -16,13 +16,13 @@ class Attract(object):
         screen.fill((150,150,150))
         font = pygame.font.SysFont('helvetica',60)
         font = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
-        font.set_bold(True)
-        press=font.render('Press',True,(255,0,0))
-        start=font.render('ENTER',True,(255,0,0))
-        screen.blit(press,\
-                ((width-press.get_width())*.5,height*.5-press.get_height()))
-        screen.blit(start,\
-                ((width-start.get_width())*.5,height*.5))
+        #font.set_bold(True)
+        #press=font.render('Press',True,(255,0,0))
+        #start=font.render('ENTER',True,(255,0,0))
+        #screen.blit(press,\
+        #        ((width-press.get_width())*.5,height*.5-press.get_height()))
+        #screen.blit(start,\
+        #        ((width-start.get_width())*.5,height*.5))
         
         self.model.update(time)
         surf = self.model.draw()
