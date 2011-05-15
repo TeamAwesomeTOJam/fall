@@ -8,7 +8,7 @@ def main():
     pygame.init()
     if pygame.joystick.get_count() > 0:
         pygame.joystick.Joystick(0).init()
-    screen = pygame.display.set_mode((WIDTH,HEIGHT),0,32)
+    screen = pygame.display.set_mode((WIDTH,HEIGHT))
     clock = pygame.time.Clock()
 
     state = 0
