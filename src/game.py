@@ -294,11 +294,7 @@ class Game(object):
                     self.jump = True
                     self.jump_time = JUMP_TIME
                     self.player.jump()
-                if e.button == 2:
-                    self.player.body.reset_forces()
-                if e.button == 3:
-                    self.player.body.reset_forces()                   
-                    self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
+                    
             elif e.type == JOYBUTTONUP:
                 if e.button == 1:
                     self.jump = False
