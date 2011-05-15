@@ -62,7 +62,7 @@ class level(object):
         pickle.dump(self, outfile)
 
     def get_line(self, shape):
-        return self.lines[shape]
+        return self.lines.get(shape, None)
         
     def add_or_inc(self,dict,v):
         if v in dict:

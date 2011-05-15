@@ -86,9 +86,7 @@ class game(object):
         self.screen_shape = None
         self.set_screen_shape()
         
-        self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
-        self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
-        self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PARTICLE, None, self.ignore_collision, None, None)
+        self.space.set_default_collision_handler(None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, gravityvolume.handle_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, gravityvolume.handle_collision, None, None)
@@ -103,13 +101,13 @@ class game(object):
         self.screen_shape.collision_type = COLLTYPE_SCREEN
         self.space.add(self.screen_shape)
         self.on_screen = []
-        
-    def collide_screen(self, space, arbiter):
-        s1,s2 = arbiter.shapes
-        self.on_screen.append(s2)
-        return False
     
     def ignore_collision(self, space, arbiter):
+        s1, s2 = arbiter.shapes
+        if s1 == self.screen_shape:
+            self.on_screen.append(s2)
+        elif s2 == self.screen_shape:
+            self.on_screen.append(s1)
         return False
     
     def collect_player_collisions(self, space, arbiter):
@@ -450,15 +448,16 @@ class game(object):
         #Draw other stuff
         for shape in self.on_screen:
             line = self.level.get_line(shape)
-            if line.lethal:
-                color = (255, 0, 0)
-            else:
-                color = (180, 180, 180)
-            pygame.draw.line(screen, color, self.world2screen(line.start),self.world2screen(line.end),10)
-            for gvol in self.level.gvols:
-                points = gvol.shape.get_points()
-                flipped = map(self.world2screen,points)
-                pygame.draw.polygon(screen,(0,0,255),flipped,1)
+            if line:
+                if line.lethal:
+                    color = (255, 0, 0)
+                else:
+                    color = (180, 180, 180)
+                pygame.draw.line(screen, color, self.world2screen(line.start),self.world2screen(line.end),10)
+                for gvol in self.level.gvols:
+                    points = gvol.shape.get_points()
+                    flipped = map(self.world2screen,points)
+                    pygame.draw.polygon(screen,(0,0,255),flipped,1)
 
         pygame.display.flip()
         
