@@ -50,11 +50,18 @@ class Game(object):
         self.dec_snap_radius=0
         self.inc_snap_radius=0
         
+        #Load Sounds
+        self.music = pygame.mixer.Sound(os.path.join(RES, 'music.ogg'))
+        self.win_sound = pygame.mixer.Sound(os.path.join(RES, 'win.ogg'))
+        self.lose_sound = pygame.mixer.Sound(os.path.join(RES, 'lose.ogg'))
+        
+        self.music.play(-1)
+        
         #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
         self.space.gravity = Vec2d(0.0, 0.0)
-         
+        
         # Load level
         self.level_path = level_path
         try:
@@ -505,14 +512,29 @@ class Game(object):
                 
         self.physics(time)
         
+        if not self.player.was_on_ground and self.on_ground():
+            self.player.was_on_ground = True
+            self.player.land_sound.play()
+            self.player.model.play_animation(4)
+        elif not self.on_ground():
+            self.player.was_on_ground = False 
+        
+        if self.player.last_gravity != self.player.body.force:
+            self.player.gravity_sound.play()
+        self.player.last_gravity = Vec2d(self.player.body.force)
+        
         if not self.mode_edit:
             self.camera_pos = Vec2d(self.player.body.position)
         
         self.draw(screen)
         
         if self.game_over:
+            self.music.stop()
+            self.lose_sound.play()
             return 3
         elif self.win:
+            self.music.stop()
+            self.win_sound.play()
             return 4
         else:
             return 1
