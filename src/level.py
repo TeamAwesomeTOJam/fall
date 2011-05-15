@@ -1,8 +1,9 @@
 import os
 import pickle
+import pygame
 import pymunk as pm
 from pymunk import Vec2d
-from settings import COLLTYPE_LETHAL
+from settings import *
 from gravityvolume import *
 
 
@@ -29,40 +30,27 @@ class line(object):
         self.shape = pm.Segment(pm.Body(pm.inf, pm.inf), self.start, self.end, 5.0)
         if self.lethal:
             self.shape.collision_type = COLLTYPE_LETHAL
+            
+    def draw(self, screen, game):
+        if self.lethal:
+            color = (255, 0, 0)
+        else:
+            color = (180, 180, 180)
+        pygame.draw.line(screen, color, game.world2screen(self.start), game.world2screen(self.end), 10)
 
 
 class level(object):
     
     def __init__(self):
-        self.lines = {}
-        self.areas = []
-        self.enemies = []
+        self.goal = None
+        self.lines = []
+        self.gvols = []
+        self.emitters = []
         self.snaps = {}
-        self.gvols=[]
-        
-    def __getstate__(self):
-        lines = self.lines.values()
-        return {'lines' : lines,
-                'areas' : self.areas,
-                'enemies' : self.enemies,
-                'gvols' : self.gvols,
-                'snaps' : self.snaps}
-    
-    def __setstate__(self, state):
-        self.lines = {}
-        for line in state['lines']:
-            self.lines[line.shape] = line
-        self.gvols = state['gvols']
-        self.areas = state['areas']
-        self.enemies = state['enemies']
-        self.snaps = state['snaps']
 
     def save_level(self, path):
         outfile = open(path, 'wb')
         pickle.dump(self, outfile)
-
-    def get_line(self, shape):
-        return self.lines.get(shape, None)
         
     def add_or_inc(self,dict,v):
         if v in dict:
@@ -71,7 +59,7 @@ class level(object):
             dict[v]=1
 
     def add_line(self, line):
-        self.lines[line.shape] = line
+        self.lines.append(line)
         self.add_or_inc(self.snaps, (line.start[0], line.start[1]))
         self.add_or_inc(self.snaps, (line.end[0], line.end[1]))
 
@@ -79,7 +67,6 @@ class level(object):
         self.gvols.append(GravityVolume(vert_list, grav))
         for m in vert_list:
             self.add_or_inc(self.snaps,(m[0],m[1]))
-        
 
     def resnap(self):
         self.snaps={}

@@ -37,6 +37,7 @@ class Emitter(object):
             pv.angle = random.random() * math.pi * 2
             p = Particle(pv)
             game.particles.append(p)
+            game.shape_map[p.shape] = p
             game.space.add(p.body, p.shape)
     
     def draw(self, screen, game):

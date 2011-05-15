@@ -9,6 +9,7 @@ import level
 import gravityvolume
 import math
 import particles
+from gravityvolume import GravityVolume
 
 
 class game(object):
@@ -19,6 +20,10 @@ class game(object):
         
         self.on_screen = []
         self.player_collisions = []
+        
+        self.particles = []
+        
+        self.shape_map = {}
         
         self.pan_left = False
         self.pan_right = False
@@ -43,25 +48,25 @@ class game(object):
         self.snap_radius=5.0
         self.dec_snap_radius=0
         self.inc_snap_radius=0
+        
+        #PHYSICS!!!!
+        pm.init_pymunk()
+        self.space = pm.Space()
+        self.space.gravity = Vec2d(0.0, 0.0)
+         
+        # Load level
         self.level_path = os.path.join(RES, 'level.pickle')
         try:
             self.level = level.load_level(self.level_path)
         except:
             self.level = level.level()
-            
-        #PHYSICS!!!!
-        pm.init_pymunk()
-        self.space = pm.Space()
-        self.space.gravity = Vec2d(0.0, 0.0)
-        
-        #the player
-        self.player = Player(self)
-        self.space.add(self.player.body, self.player.shape)
 
-        for line in self.level.lines.iterkeys():
-            self.space.add_static(self.level.lines[line].shape)
+        for line in self.level.lines:
+            self.shape_map[line.shape] = line
+            self.space.add_static(line.shape)
 
         for gvol in self.level.gvols:
+            self.shape_map[gvol.shape] = gvol
             self.space.add_static(gvol.shape)
 
         #gravity polygons
@@ -71,16 +76,10 @@ class game(object):
         self.grav_set=False
         self.grav_vec=None
         self.poly_verts=[]
-        #gravitate
-        self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass).rotated(math.pi/4))
         
-        # make a test gravity volume
-#        g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
-#        self.space.add_static(g.shape)
-
-        self.particles = []
-        self.level.emitters = []
-        self.level.emitters.append(particles.Emitter((0,0), 0.05))
+        #the player
+        self.player = Player(self)
+        self.space.add(self.player.body, self.player.shape)
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -380,6 +379,7 @@ class game(object):
         for i in dead_particles:
             p = self.particles[i]
             self.space.remove(p.body, p.shape)
+            del self.shape_map[p.shape]
             del self.particles[i]
                 
         self.physics(time)
@@ -442,22 +442,15 @@ class game(object):
             points = self.player.shape.get_points()
             flipped = map(self.world2screen,points)
             pygame.draw.polygon(screen,(0,0,255),flipped,1)
-        
-            for gvol in self.level.gvols:
-                gvol.draw(screen, self)
-                
-            for emitter in self.level.emitters:
-                emitter.draw(screen, self)
 
         #Draw other stuff
         for shape in self.on_screen:
-            line = self.level.get_line(shape)
-            if line:
-                if line.lethal:
-                    color = (255, 0, 0)
-                else:
-                    color = (180, 180, 180)
-                pygame.draw.line(screen, color, self.world2screen(line.start),self.world2screen(line.end),10)
+            obj = self.shape_map.get(shape, None)
+            if isinstance(obj, level.line) or isinstance(obj, particles.Particle):
+                obj.draw(screen, self)
+            if isinstance(obj, GravityVolume) or isinstance(obj, particles.Emitter):
+                if self.mode_edit:
+                    obj.draw(screen, self)
 
         pygame.display.flip()
         
