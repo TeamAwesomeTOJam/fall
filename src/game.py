@@ -4,8 +4,8 @@ import pygame
 from pymunk import Vec2d
 import pymunk as pm
 from pygame.locals import *
-from level import level
 from player import Player
+import level
 import gravityvolume
 
 
@@ -27,6 +27,8 @@ class game(object):
         
         self.jump = False
         self.jump_time = 0
+        
+        self.last_on_ground = 0
 
         #Editor events
         self.mode_edit=False
@@ -38,9 +40,12 @@ class game(object):
         self.snap_radius=5.0
         self.dec_snap_radius=0
         self.inc_snap_radius=0
-        self.level_path=os.path.join(RES, 'level.pickle')
-        self.level = level()
-        
+        self.level_path = os.path.join(RES, 'level.pickle')
+        try:
+            self.level = level.load_level(self.level_path)
+        except:
+            self.level = level.level()
+            
         #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
@@ -50,6 +55,8 @@ class game(object):
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
 
+        for line in self.level.lines.iterkeys():
+            self.space.add_static(self.level.lines[line].shape)
 
         #gravity polygons
         self.mode_gvol=False
@@ -60,8 +67,8 @@ class game(object):
         self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         
         # make a test gravity volume
-        #g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
-        #self.space.add_static(g.shape)
+#        g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
+#        self.space.add_static(g.shape)
 
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -72,12 +79,9 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, gravityvolume.handle_collision, None, None)
-        
-        self.level.load_level(self.level_path)
-        for line in self.level.lines.iterkeys():
-            self.space.add_static(self.level.lines[line].shape)
-    
-        #self.level = 
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_DEFAULT, None, gravityvolume.handle_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
         
     def set_screen_shape(self):
         if self.screen_shape:
@@ -88,7 +92,6 @@ class game(object):
         self.space.add(self.screen_shape)
         self.on_screen = []
         
-    
     def collide_screen(self, space, arbiter):
         s1,s2 = arbiter.shapes
         self.on_screen.append(s2)
@@ -101,8 +104,12 @@ class game(object):
         for c in arbiter.contacts:
             self.player_collisions.append(c.position)
         return True
-        
-
+    
+    def handle_lethal_collision(self, space, arbiter):
+        return True
+    
+    def handle_goal_collision(self, space, arbiter):
+        return True
 
     def world2screen(self,v):
         x,y = v
@@ -121,10 +128,15 @@ class game(object):
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
     
     def on_ground(self):
+        if self.last_on_ground > 0:
+            return True
         for c in self.player_collisions:
-            p = self.player.shape.body.position
-            a = (c - p).get_angle_degrees()
-            if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
+            body_loc = self.player.body.world_to_local(c)
+            #p = self.player.shape.body.position
+            #a = (c - p).get_angle_degrees()
+            #if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
+            if abs(body_loc.y + 20) < 3:
+                self.last_on_ground = DOWN_HILL_GRACE
                 return True
         return False
 
@@ -244,8 +256,8 @@ class game(object):
 
 
     def tick(self,screen,clock):
-        time = clock.tick(50)/1000.0
-        pygame.display.set_caption("fps: " + str(clock.get_fps()))
+        time = clock.tick(60)/1000.0
+        #pygame.display.set_caption("fps: " + str(clock.get_fps()))
         self.handle_input()
 
         if self.pan_left:
@@ -260,13 +272,18 @@ class game(object):
         #check to see if the player is allowed to move left/right
         allow_left = True
         allow_right = True
+        #print 'collisions'
         for c in self.player_collisions:
-            p = self.player.shape.body.position
-            a = (c - p).get_angle_degrees()
+            body_loc = self.player.body.world_to_local(c)
+            #print body_loc
+            #p = self.player.shape.body.position
+            #a = (c - p).get_angle_degrees()
             #print a
-            if abs((a % 360) - 180) < PLAYER_WALL_COLLISION_ANGLE:
+            #if abs((a % 360) - 180) < PLAYER_WALL_COLLISION_ANGLE:
+            if abs(body_loc.x + 20) < 3:
                 allow_left = False
-            if abs(a) < PLAYER_WALL_COLLISION_ANGLE:
+            #if abs(a) < PLAYER_WALL_COLLISION_ANGLE:
+            if abs(body_loc.x - 20) < 3:
                 allow_right = False
             
         #control the player
@@ -279,6 +296,9 @@ class game(object):
         if self.jump and self.jump_time > 0:
             self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
             self.jump_time -= time
+        
+        if self.last_on_ground > 0:
+            self.last_on_ground -= time
         
         if speed and self.on_ground():
             self.player.walk()
@@ -305,6 +325,8 @@ class game(object):
                         self.mode_grav_vec = (self.pos_end[0]-self.pos_start[0], self.pos_end[1]-self.pos_start[1])
                     else:
                         self.poly_verts.append(pos)
+                        self.pos_end=self.pos_start
+                        self.pos_start=None
                 if self.mode_grav_vec is not None and self.poly_verts!=[]:
                     self.level.add_gvol(self.poly_verts,self.mode_grav_vec)
                 else:
@@ -316,7 +338,7 @@ class game(object):
                 shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
                 shape.friction = 1.0
                 self.space.add_static(shape)
-                self.level.add_line(self.pos_start,self.pos_end,shape)
+                self.level.add_line(level.line(self.pos_start, self.pos_end, shape))
                 self.pos_start = None
                 self.pos_end= None
 
@@ -348,6 +370,12 @@ class game(object):
 #        pygame.draw.line(screen, (255,0,0), p, p+p2)
 #        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
+        #points = self.player.shape.get_points()
+        #flipped = map(self.world2screen,points)
+        #pygame.draw.polygon(screen,(0,0,255),flipped,1)
+        
+        #for p in self.player_collisions:
+        #    pygame.draw.circle(screen, (255,0,0) , self.world2screen(p),3,0)
         
         if self.mode_edit:
             pos_snap=self.level.check_snap(self.pos_mouse,self.snap_radius)
@@ -376,7 +404,11 @@ class game(object):
         #Draw other stuff
         for shape in self.on_screen:
             line = self.level.get_line(shape)
-            pygame.draw.line(screen, (180,180,180), self.world2screen(line.start),self.world2screen(line.end),10)
+            if line.lethal:
+                color = (255, 0, 0)
+            else:
+                color = (180, 180, 180)
+            pygame.draw.line(screen, color, self.world2screen(line.start),self.world2screen(line.end),10)
 
         pygame.display.flip()
         
