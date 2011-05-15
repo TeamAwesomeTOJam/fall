@@ -23,7 +23,7 @@ DURATION = 10
 class StickMan(object):
 
     def __init__(self, animation_path):
-        self.color = (0, 0, 0, 255)
+        self.color = (255, 255, 255)
         self.width = 2
         self.upper_arm_length = 18
         self.lower_arm_length = 18
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     
     while True:
-        dt = clock.tick() / 1000.0
+        dt = clock.tick(60) / 1000.0
         
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -252,11 +252,11 @@ if __name__ == '__main__':
         if play:
             sm.update(dt)
         
-        screen.fill((255,255,255,255))
+        screen.fill((0,0,0,255))
         surf = sm.draw(editor=True, selection=control)
         screen.blit(surf, (0,0))
-        screen.blit(font.render('Frame %s/%s' % (sm.frame_index+1, len(sm.animation)), True, (0,0,0)), (128, 0))
-        screen.blit(font.render('Animation %s/%s' % (animation+1, len(sm.animations)), True, (0,0,0)), (128, 24))
+        screen.blit(font.render('Frame %s/%s' % (sm.frame_index+1, len(sm.animation)), True, (255,255,255)), (128, 0))
+        screen.blit(font.render('Animation %s/%s' % (animation+1, len(sm.animations)), True, (255,255,255)), (128, 24))
         if control == Y_OFFSET:
             screen.blit(font.render('Y Offset %.2f' % (sm.prev_frame[Y_OFFSET],), True, (255,255,0)), (128, 48))
         elif control == DURATION:

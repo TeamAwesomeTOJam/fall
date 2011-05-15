@@ -400,7 +400,7 @@ class game(object):
         self.space.step(time)
     
     def draw(self,screen):
-        screen.fill((255,255,255))
+        screen.fill((0,0,0))
 
         for p in self.particles:
             pygame.draw.circle(screen, (255,0,0), self.world2screen(p.body.position), 1)
@@ -416,9 +416,6 @@ class game(object):
 #        pygame.draw.line(screen, (255,0,0), p, p+p2)
 #        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
-        points = self.player.shape.get_points()
-        flipped = map(self.world2screen,points)
-        pygame.draw.polygon(screen,(0,0,255),flipped,1)
         
         #for p in self.player_collisions:
         #    pygame.draw.circle(screen, (255,0,0) , self.world2screen(p),3,0)
@@ -432,7 +429,7 @@ class game(object):
                 pre_end=self.pos_mouse
             #Draw mouse drag
             if self.pos_start is not None and self.pos_mouse is not None:
-                pygame.draw.line(screen, (0,0,0), self.world2screen(self.pos_start),self.world2screen(pre_end))
+                pygame.draw.line(screen, (255,255,255), self.world2screen(self.pos_start),self.world2screen(pre_end))
             #draw edit osd
             cmds = ["Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
                     "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Polygon mode: p"]
@@ -445,13 +442,22 @@ class game(object):
                 pygame.draw.line(screen, (0,0,255), \
                         self.world2screen(self.poly_verts[i]),self.world2screen(self.poly_verts[(i+1)%len(self.poly_verts)]),10)
 
-
-
             for i in xrange(len(cmds)):
                 cmd=cmds[i]
-                surf=font.render(cmd,True,(40,40,40))
+                surf=font.render(cmd,True,(80,80,80))
                 screen.blit(surf,(self.cmd_x,self.cmd_y+i*surf.get_height()))
 
+            points = self.player.shape.get_points()
+            flipped = map(self.world2screen,points)
+            pygame.draw.polygon(screen,(0,0,255),flipped,1)
+        
+            for gvol in self.level.gvols:
+                points = gvol.shape.get_points()
+                flipped = map(self.world2screen,points)
+                pygame.draw.polygon(screen,(0,0,255),flipped,1)
+                
+            for emitter in self.level.emitters:
+                pygame.draw.circle(screen, (0,0,255), self.world2screen(emitter.position), 8, 2)
 
         #Draw other stuff
         for shape in self.on_screen:
@@ -462,10 +468,6 @@ class game(object):
                 else:
                     color = (180, 180, 180)
                 pygame.draw.line(screen, color, self.world2screen(line.start),self.world2screen(line.end),10)
-                for gvol in self.level.gvols:
-                    points = gvol.shape.get_points()
-                    flipped = map(self.world2screen,points)
-                    pygame.draw.polygon(screen,(0,0,255),flipped,1)
 
         pygame.display.flip()
         
