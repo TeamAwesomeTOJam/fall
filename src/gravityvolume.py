@@ -1,3 +1,5 @@
+import weakref
+
 import pymunk
 
 from settings import *
@@ -5,13 +7,16 @@ from settings import *
 
 class GravityVolume(object):
 
-    volumes = {}
+    volumes = weakref.WeakValueDictionary()
 
     def __init__(self, vertices, g):
         self.vertices = vertices
         self.g = g
         self._init_pymunk()
         
+    def __del__(self):
+        del GravityVolume.volumes[self.shape]
+    
     def _init_pymunk(self):
         self.body = pymunk.Body(pymunk.inf, pymunk.inf)
         self.shape = pymunk.Poly(self.body, self.vertices)
