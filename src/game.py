@@ -15,7 +15,7 @@ import portal
 
 class Game(object):
 
-    def __init__(self):
+    def __init__(self, level_path):
         self.game_over = False
         self.win = False
         self.camera_pos = Vec2d(0,0)
@@ -60,7 +60,7 @@ class Game(object):
         self.space.gravity = Vec2d(0.0, 0.0)
          
         # Load level
-        self.level_path = os.path.join(RES, 'level.pickle')
+        self.level_path = level_path
         try:
             self.level = level.load_level(self.level_path)
         except:
@@ -482,7 +482,7 @@ class Game(object):
         if self.game_over:
             return 3
         elif self.win:
-            return 5
+            return 4
         else:
             return 1
     

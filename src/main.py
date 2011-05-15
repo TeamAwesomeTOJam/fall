@@ -11,22 +11,32 @@ def main():
     screen = pygame.display.set_mode((WIDTH,HEIGHT),0,32)
     clock = pygame.time.Clock()
 
-    g = Game()
     a = Attract()
 
-    state = 0
+    state = 5
     while 1:
         if state == 0:
             state = a.attract(screen,clock)
         if state == 1:
-            state = g.tick(screen,clock)
+            state = game.tick(screen,clock)
+            if state == 4:
+                level_idx += 1
+                if level_idx < len(LEVELS):
+                    game = Game(os.path.join(RES, LEVELS[level_idx]))
+                    state = 1
         if state == 2:
             state = pause(screen,clock)
         if state == 3:
             state = game_over(screen,clock)
+            if state == 1:
+                game = Game(os.path.join(RES, LEVELS[level_idx]))
         if state == 4:
-            exit()
-        if state == 5:
             state = win(screen, clock)
+        if state == 5:
+            level_idx = 0
+            game = Game(os.path.join(RES, LEVELS[level_idx]))
+            state = 0
+            
 
-if __name__ == '__main__': main()
+if __name__ == '__main__': 
+    main()

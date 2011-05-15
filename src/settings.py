@@ -4,6 +4,8 @@ import os.path
 ROOT = os.path.normpath(os.path.join(sys.path[0], '..')) 
 RES = os.path.join(ROOT, 'res')
 
+LEVELS = ['level.pickle', 'level.pickle']
+
 WIDTH = 800
 HEIGHT = 600
 
