@@ -83,7 +83,6 @@ class StickMan(object):
         self.frame_elapsed = 0
         self.prev_frame = self.animation[self.frame_index]
         self.next_frame = self.animation[(self.frame_index + 1) % len(self.animation)]
-        print self.prev_frame
 
     def update(self, dt):
         self.frame_elapsed += dt
@@ -262,5 +261,7 @@ if __name__ == '__main__':
             screen.blit(font.render('Y Offset %.2f' % (sm.prev_frame[Y_OFFSET],), True, (255,255,0)), (128, 48))
         elif control == DURATION:
             screen.blit(font.render('Duration %.2f' % (sm.animation.duration,), True, (255,255,0)), (128, 48))
+        else:
+            screen.blit(font.render('Angle %.2f' % (sm.prev_frame[control],), True, (255,255,0)), (128, 48))
         pygame.display.flip()
 
