@@ -15,7 +15,6 @@ class line(object):
         if lethal:
             shape.collision_type = COLLTYPE_LETHAL
         
-        
     def __getstate__(self):
         return {'start' : (self.start[0], self.start[1]),
                 'end' : (self.end[0], self.end[1]),
