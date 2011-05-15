@@ -2,6 +2,7 @@ import os
 
 import pygame
 import pymunk
+from pymunk import Vec2d
 
 from settings import *
 from stickman import StickMan, Animation
@@ -61,11 +62,19 @@ class Player(object):
         if self.dir == -1:
             surf = pygame.transform.flip(surf, True, False)
         
+        diff = Vec2d(0,surf.get_height() / 2.0 - 28)
+        diff.rotate(self.game.player.body.force.rotated(math.pi/2.0).get_angle())
+        center = self.game.world2screen(self.body.position + diff)
+        
         surf = pygame.transform.rotozoom(surf, self.game.player.body.force.rotated(math.pi/2.0).get_angle_degrees(),1)
+        
+        rect = surf.get_rect()
+        rect.center = center
         #surf = pygame.transform.rotate(surf, math.pi/2.0)
-        x, y = self.game.world2screen(self.body.position)
-        x -= surf.get_width() / 2.0
-        y -= surf.get_height() - PLAYER_RADIUS - 8 
-        screen.blit(surf, (x, y))
+        #x, y = self.game.world2screen(self.body.position)
+        #x -= surf.get_width() / 2.0
+        #y -= surf.get_height() - PLAYER_RADIUS - 8 
+        
+        screen.blit(surf, rect.topright)
         
         

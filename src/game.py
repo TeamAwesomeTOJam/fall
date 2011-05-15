@@ -8,6 +8,8 @@ from player import Player
 import level
 import gravityvolume
 import math
+import particles
+
 
 class game(object):
 
@@ -77,6 +79,8 @@ class game(object):
 #        self.space.add_static(g.shape)
 
         self.particles = []
+        self.level.emitters = []
+        self.level.emitters.append(particles.Emitter((0,0), 0.01))
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -85,6 +89,7 @@ class game(object):
         
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_DEFAULT, None, self.collide_screen, None, None)
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PARTICLE, None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, gravityvolume.handle_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, gravityvolume.handle_collision, None, None)
@@ -366,12 +371,17 @@ class game(object):
 
         self.player.update(time)
         
+        for e in self.level.emitters:
+            e.update(self, time)
+        
         dead_particles = []
         for i, p in enumerate(self.particles):
             p.ttl -= time
             if p.ttl < 0:
                 dead_particles.append(i)
         for i in dead_particles:
+            p = self.particles[i]
+            self.space.remove(p.body, p.shape)
             del self.particles[i]
                 
         self.physics(time)
