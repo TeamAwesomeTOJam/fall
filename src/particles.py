@@ -10,7 +10,7 @@ from settings import *
 
 class Particle(object):
 
-    def __init__(self, position, velocity, ttl=15):
+    def __init__(self, position, velocity, ttl=5):
         self.ttl = ttl
         self.body = pymunk.Body(1, 1)
         self.body.position = position
@@ -25,15 +25,14 @@ class Particle(object):
 
 class Emitter(object):
     
-    def __init__(self, position, period):
+    def __init__(self, position):
         self.position = (position[0], position[1])
-        self.period = period
         self.counter = 0
         
     def update(self, game, dt):
         self.counter += dt
-        if self.counter > self.period:
-            self.counter -= self.period
+        if self.counter > EMITTER_PERIOD:
+            self.counter -= EMITTER_PERIOD
             pp = self.position
             pv = pymunk.Vec2d(0, 1)
             pv.length = 100

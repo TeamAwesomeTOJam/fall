@@ -297,7 +297,7 @@ class Game(object):
                 
                 elif e.button == 3:
                     pos = self.screen2world(e.pos)
-                    self.level.emitters.append(particles.Emitter(pos, 0.01))
+                    self.level.emitters.append(particles.Emitter(pos))
                     
                 elif e.button == 2:
                     pos = self.screen2world(e.pos)
@@ -358,7 +358,7 @@ class Game(object):
 
     def tick(self,screen,clock):
         time = clock.tick(60)/1000.0
-        #pygame.display.set_caption("fps: " + str(clock.get_fps()))
+        #print 'fps: ' +  str(clock.get_fps())
         self.handle_input()
 
         if self.pan_left:
@@ -405,6 +405,7 @@ class Game(object):
             speed += PLAYER_SPEED
         
         if self.jump and self.jump_time > 0:
+            #print Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME).rotated(self.player.body.force.angle + math.pi/2)
             self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME).rotated(self.player.body.force.angle + math.pi/2))
             self.jump_time -= time
         
