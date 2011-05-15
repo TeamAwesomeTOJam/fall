@@ -55,9 +55,9 @@ class Player(object):
     def draw(self, screen):
         surf = self.model.draw()
         #print self.body.velocity
-        if self.body.velocity.x < -20:
+        if self.body.velocity.x < -1*FLIP_THRESHOLD:
             self.dir = -1
-        elif self.body.velocity.x > 20:
+        elif self.body.velocity.x > FLIP_THRESHOLD:
             self.dir = 1
         if self.dir == -1:
             surf = pygame.transform.flip(surf, True, False)
