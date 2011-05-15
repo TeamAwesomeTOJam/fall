@@ -333,7 +333,7 @@ class Game(object):
             speed += PLAYER_SPEED
         
         if self.jump and self.jump_time > 0:
-            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
+            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME).rotated(self.player.body.force.angle + math.pi/2))
             self.jump_time -= time
         
         if self.last_on_ground > 0:
