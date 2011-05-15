@@ -67,6 +67,12 @@ class Level(object):
         self.gvols.append(gvol)
         for m in gvol.vertices:
             self.add_or_inc(self.snaps,(m[0],m[1]))
+    
+    def add_emitter(self, emitter):
+        self.emitters.append(emitter)
+        
+    def set_goal(self, goal):
+        self.goal = goal
 
     def resnap(self):
         self.snaps={}
