@@ -1,26 +1,39 @@
 import pygame
+from stickman import StickMan, Animation
 
-def attract(screen,clock):
-    height = screen.get_height()
-    width = screen.get_width()
-    screen.fill((150,150,150))
-    font = pygame.font.SysFont('helvetica',60)
-    font.set_bold(True)
-    press=font.render('Press',True,(255,0,0))
-    start=font.render('ENTER',True,(255,0,0))
-    screen.blit(press,\
-            ((width-press.get_width())*.5,height*.5-press.get_height()))
-    screen.blit(start,\
-            ((width-start.get_width())*.5,height*.5))
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
-            exit()
-        if e.type == pygame.KEYDOWN:
-            if e.key == pygame.K_RETURN:
-                return 1
-    clock.tick(10)
-    pygame.display.flip()
-    return 0
+class Attract(object):
+
+    def __init__(self):
+        self.model = StickMan(os.path.join(RES, 'animations.pickle'))
+        self.model.set_default_animation(1)
+
+    def attract(self,screen,clock):
+        time = clock.tick(60)/1000.0
+        height = screen.get_height()
+        width = screen.get_width()
+        screen.fill((150,150,150))
+        font = pygame.font.SysFont('helvetica',60)
+        font.set_bold(True)
+        press=font.render('Press',True,(255,0,0))
+        start=font.render('ENTER',True,(255,0,0))
+        screen.blit(press,\
+                ((width-press.get_width())*.5,height*.5-press.get_height()))
+        screen.blit(start,\
+                ((width-start.get_width())*.5,height*.5))
+        
+        self.model.update(time)
+        surf = self.model.draw()
+        screen.blit(surf, (width/2, height/2))
+        
+        
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                exit()
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_RETURN:
+                    return 1
+        pygame.display.flip()
+        return 0
 
 
 def play_game(screen,clock):

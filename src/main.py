@@ -12,11 +12,12 @@ def main():
     clock = pygame.time.Clock()
 
     g = Game()
+    a = Atrract
 
     state = 0
     while 1:
         if state == 0:
-            state = attract(screen,clock)
+            state = a.attract(screen,clock)
         if state == 1:
             state = g.tick(screen,clock)
         if state == 2:
