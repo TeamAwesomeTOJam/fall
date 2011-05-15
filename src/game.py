@@ -79,7 +79,7 @@ class game(object):
 
         self.particles = []
         self.level.emitters = []
-        self.level.emitters.append(particles.Emitter((0,0), 0.01))
+        self.level.emitters.append(particles.Emitter((0,0), 0.05))
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
