@@ -52,13 +52,15 @@ class Level(object):
         outfile = open(path, 'wb')
         pickle.dump(self, outfile)
 
-    def dec_or_del(self,v,dict=self.snaps):
+    def dec_or_del(self,v,dict=None):
+        if dict is None: dict=self.snaps
         if v in dict:
             dict[v]-=1
             if dict[v]<1:
                 del dict[v]
         
-    def add_or_inc(self,v,dict=self.snaps):
+    def add_or_inc(self,v,dict=None):
+        if dict is None: dict=self.snaps
         if v in dict:
             dict[v]+=1
         else:
@@ -83,8 +85,8 @@ class Level(object):
     def resnap(self):
         self.snaps={}
         for line in self.lines:
-            self.add_or_inc((line.start[0], line.start[1])
-            self.add_or_inc((line.end[0], line.end[1]) , self.snaps)
+            self.add_or_inc((line.start[0], line.start[1]))
+            self.add_or_inc((line.end[0], line.end[1]) )
         
     def check_snap(self,u,r):
         for v in self.snaps.iterkeys():
