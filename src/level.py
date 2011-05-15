@@ -78,9 +78,8 @@ class level(object):
     def add_gvol(self,vert_list,grav):
         self.gvols.append(GravityVolume(vert_list, grav))
         for m in vert_list:
-            self.add_or_inc(self.snaps,m)
+            self.add_or_inc(self.snaps,(m[0],m[1]))
         
-        print self.gvols
 
     def resnap(self):
         self.snaps={}

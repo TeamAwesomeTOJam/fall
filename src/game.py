@@ -58,6 +58,9 @@ class game(object):
         for line in self.level.lines.iterkeys():
             self.space.add_static(self.level.lines[line].shape)
 
+        for gvol in self.level.gvols:
+            self.space.add_static(gvol.shape)
+
         #gravity polygons
         self.mode_gvol=False
         self.mode_grav_vec=False
@@ -345,8 +348,8 @@ class game(object):
                 self.pos_start = None
                 self.pos_end= None
             if self.grav_set and self.mode_grav_vec is not None and self.poly_verts!=[]:
-                print self.poly_verts,self.grav_vec
-                self.level.add_gvol(self.poly_verts,self.grav_vec)
+                self.level.add_gvol(map(lambda x:(x[0],x[1]),self.poly_verts),self.grav_vec)
+                self.space.add_static(self.level.gvols[-1].shape)
                 self.poly_verts=[]
                 self.grav_vec=None
 
@@ -423,6 +426,10 @@ class game(object):
             else:
                 color = (180, 180, 180)
             pygame.draw.line(screen, color, self.world2screen(line.start),self.world2screen(line.end),10)
+            for gvol in self.level.gvols:
+                points = gvol.shape.get_points()
+                flipped = map(self.world2screen,points)
+                pygame.draw.polygon(screen,(0,0,255),flipped,1)
 
         pygame.display.flip()
         
