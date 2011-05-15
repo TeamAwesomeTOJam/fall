@@ -14,6 +14,8 @@ def main():
     level_idx = 0
 
     a = Attract()
+    w = Win()
+    go = GameOver()
 
     state = 5
     while 1:
@@ -29,11 +31,15 @@ def main():
         if state == 2:
             state = pause(screen,clock)
         if state == 3:
-            state = game_over(screen,clock)
+            go.model.play_animation(6)
+            go.model.show_frame(0)
+            state = 6
+        if state == 6:
+            state = go.game_over(screen,clock)
             if state == 1:
                 game = Game(os.path.join(RES, LEVELS[level_idx]))
         if state == 4:
-            state = win(screen, clock)
+            state = w.win(screen, clock)
         if state == 5:
             level_idx = 0
             game = Game(os.path.join(RES, LEVELS[level_idx]))
