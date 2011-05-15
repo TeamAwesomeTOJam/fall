@@ -27,6 +27,8 @@ class game(object):
         
         self.jump = False
         self.jump_time = 0
+        
+        self.last_on_ground = 0
 
         #Editor events
         self.mode_edit=False
@@ -124,10 +126,15 @@ class game(object):
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
     
     def on_ground(self):
+        if self.last_on_ground > 0:
+            return True
         for c in self.player_collisions:
-            p = self.player.shape.body.position
-            a = (c - p).get_angle_degrees()
-            if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
+            body_loc = self.player.body.world_to_local(c)
+            #p = self.player.shape.body.position
+            #a = (c - p).get_angle_degrees()
+            #if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
+            if abs(body_loc.y + 20) < 3:
+                self.last_on_ground = DOWN_HILL_GRACE
                 return True
         return False
 
@@ -261,13 +268,18 @@ class game(object):
         #check to see if the player is allowed to move left/right
         allow_left = True
         allow_right = True
+        #print 'collisions'
         for c in self.player_collisions:
-            p = self.player.shape.body.position
-            a = (c - p).get_angle_degrees()
+            body_loc = self.player.body.world_to_local(c)
+            #print body_loc
+            #p = self.player.shape.body.position
+            #a = (c - p).get_angle_degrees()
             #print a
-            if abs((a % 360) - 180) < PLAYER_WALL_COLLISION_ANGLE:
+            #if abs((a % 360) - 180) < PLAYER_WALL_COLLISION_ANGLE:
+            if abs(body_loc.x + 20) < 3:
                 allow_left = False
-            if abs(a) < PLAYER_WALL_COLLISION_ANGLE:
+            #if abs(a) < PLAYER_WALL_COLLISION_ANGLE:
+            if abs(body_loc.x - 20) < 3:
                 allow_right = False
             
         #control the player
@@ -280,6 +292,9 @@ class game(object):
         if self.jump and self.jump_time > 0:
             self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
             self.jump_time -= time
+        
+        if self.last_on_ground > 0:
+            self.last_on_ground -= time
         
         if speed and self.on_ground():
             self.player.walk()
@@ -336,6 +351,12 @@ class game(object):
 #        pygame.draw.line(screen, (255,0,0), p, p+p2)
 #        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
+        #points = self.player.shape.get_points()
+        #flipped = map(self.world2screen,points)
+        #pygame.draw.polygon(screen,(0,0,255),flipped,1)
+        
+        #for p in self.player_collisions:
+        #    pygame.draw.circle(screen, (255,0,0) , self.world2screen(p),3,0)
         
         if self.mode_edit:
             pos_snap=self.level.check_snap(self.pos_mouse,self.snap_radius)
