@@ -11,6 +11,7 @@ import math
 import particles
 from gravityvolume import GravityVolume
 import portal
+import coin
 
 
 class Game(object):
@@ -55,6 +56,7 @@ class Game(object):
         self.win_sound = pygame.mixer.Sound(os.path.join(RES, 'win.ogg'))
         self.win_sound.set_volume(0.6)
         self.lose_sound = pygame.mixer.Sound(os.path.join(RES, 'lose.ogg'))
+        self.coin_sound = pygame.mixer.Sound(os.path.join(RES, 'coin.ogg'))
         
         self.music.play(-1)
         
@@ -69,6 +71,9 @@ class Game(object):
             self.level = level.load_level(self.level_path)
         except:
             self.level = level.Level()
+        
+        if not hasattr(self.level, 'coins'):
+            self.level.coins = []
 
         for line in self.level.lines:
             self.shape_map[line.shape] = line
@@ -81,6 +86,10 @@ class Game(object):
         if self.level.goal:
             self.shape_map[self.level.goal.shape] = self.level.goal
             self.space.add_static(self.level.goal.shape)
+            
+        for cn in self.level.coins:
+            self.shape_map[cn.shape] = cn
+            self.space.add_static(cn.shape)
 
         #gravity polygons
         self.mode_gvol=False
@@ -104,6 +113,8 @@ class Game(object):
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_MOUSE, self.del_line,None,None,None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_MOUSE, self.del_gvol,None,None,None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_MOUSE, self.del_line,None,None,None)
+        self.space.add_collision_handler(COLLTYPE_COIN, COLLTYPE_MOUSE, self.del_coin,None,None,None)
+                
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
         self.screen_shape = None
@@ -115,6 +126,7 @@ class Game(object):
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, self.handle_gvol_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_GOAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_COIN, COLLTYPE_PLAYER, None, self.handle_coin_collision, None, None)
         
     def set_screen_shape(self):
         if self.screen_shape:
@@ -166,6 +178,14 @@ class Game(object):
         body.apply_force((gvol.g[0] * body.mass, gvol.g[1] * body.mass))
         return False
 
+    def handle_coin_collision(self, space, arbiter):
+        player_shape, coin_shape = arbiter.shapes
+        cn = self.shape_map[coin_shape]
+        if cn.picked_up == False:
+            self.coin_sound.play()
+        cn.picked_up = True
+        return False
+
     def del_line(self, space, arbiter):
         if self.del_mode:
             line_shape, mouse = arbiter.shapes
@@ -186,7 +206,16 @@ class Game(object):
             del self.shape_map[gvol_shape]
             self.space.remove_static(gvol_shape)
             self.level.gvols.remove(gvol)
-        return False 
+        return False
+    
+    def del_coin(self, space, arbiter):
+        if self.del_mode:
+            coin_shape, mouse = arbiter.shapes
+            cn = self.shape_map[coin_shape]
+            del self.shape_map[coin_shape]
+            self.space.remove_static(coin_shape)
+            self.level.coins.remove(cn)
+        return False
 
     def world2screen(self,v):
         x,y = v
@@ -318,7 +347,14 @@ class Game(object):
                         self.space.remove_static(self.level.goal.shape)
                     self.level.goal = portal.Portal(pos)
                     self.shape_map[self.level.goal.shape] = self.level.goal
-                    self.space.add_static(self.level.goal.shape)                  
+                    self.space.add_static(self.level.goal.shape)
+                
+                elif e.button == 4:
+                    pos = self.screen2world(e.pos)
+                    cn = coin.Coin(pos)
+                    self.level.coins.append(cn)
+                    self.shape_map[cn.shape] = cn
+                    self.space.add_static(cn.shape)                          
 
             elif e.type == pygame.MOUSEBUTTONUP and self.mode_edit:
                 if e.button == 1:
@@ -601,7 +637,7 @@ class Game(object):
         #Draw other stuff
         for shape in self.on_screen:
             obj = self.shape_map.get(shape, None)
-            if isinstance(obj, (level.Line, particles.Particle, Player, portal.Portal)):
+            if isinstance(obj, (level.Line, particles.Particle, Player, portal.Portal, coin.Coin)):
                 obj.draw(screen, self)
             elif isinstance(obj, GravityVolume) and self.mode_edit:
                 obj.draw(screen, self)
