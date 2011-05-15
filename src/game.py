@@ -542,7 +542,7 @@ class Game(object):
                 pygame.draw.line(screen, (255,255,255), self.world2screen(self.pos_start),self.world2screen(pre_end))
             #draw edit osd
             cmds = ["Save: k", "Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
-                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Gravity Volume Mode: G", "Delete Mode: X"
+                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Gravity Volume Mode: G", "Delete Mode: X"]
             if self.mode_gvol:
                 cmds.append("Gravity Volume Mode ENABLED")
                 if self.mode_grav_vec: cmds.append("Draw Gravity Vector: MOUSE1 drag")
