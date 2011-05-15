@@ -252,6 +252,8 @@ class Game(object):
                             self.poly_verts=[]
                             self.grav_vec=None
                         self.mode_gvol = not self.mode_gvol
+                    elif e.key == K_m and self.del_mode and len(self.level.emitters)>0:
+                        del self.level.emitters[-1]
                 elif e.key == K_LEFT:
                     self.move_left = True
                     self.swap_keys()
@@ -536,14 +538,15 @@ class Game(object):
             if self.pos_start is not None and self.pos_mouse is not None:
                 pygame.draw.line(screen, (255,255,255), self.world2screen(self.pos_start),self.world2screen(pre_end))
             #draw edit osd
-            cmds = ["Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
-                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Gravity Volume Mode: G", "Delete Mode: X"]
+            cmds = ["Save: k", "Pan Up: w", "Pan Left: a", "Pan Down: s", "Pan Right: d", "Toggle Edit mode: E",\
+                    "Save: k", "Increase Snap Radius: .", "Decrease Snap Radius: ,", "Gravity Volume Mode: G", "Delete Mode: X"
             if self.mode_gvol:
                 cmds.append("Gravity Volume Mode ENABLED")
                 if self.mode_grav_vec: cmds.append("Draw Gravity Vector: MOUSE1 drag")
                 else: cmds.append("Draw Gravity Polygon: MOUSE1 click vertices")
             if self.del_mode:
                 cmds.append("DELETE MODE: MOUSEOVER KILLS")
+                cmds.append("Delete Last Emitter: m")
             font = pygame.font.SysFont('helvetica',14)
             for i in xrange(len(self.poly_verts)):
                 pygame.draw.line(screen, (0,0,255), \
