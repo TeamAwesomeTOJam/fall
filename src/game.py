@@ -37,6 +37,9 @@ class Game(object):
         self.jump = False
         self.jump_time = 0
         
+        self.swap_lr = False
+        self.set_keys_later = False
+        
         self.last_on_ground = 0
 
         #Editor events
@@ -97,7 +100,7 @@ class Game(object):
         
         self.space.set_default_collision_handler(None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
-        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, self.hit_and_gravity_volume, None, None)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, self.enter_gravity_volume, self.hit_and_gravity_volume, None, self.leave_gravity_volume)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, self.handle_gvol_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
@@ -134,6 +137,17 @@ class Game(object):
     
     def handle_goal_collision(self, space, arbiter):
         return True
+    
+    def leave_gravity_volume(self, space, arbiter):
+        self.set_keys_later = not self.on_ground()
+        return True
+    
+    def enter_gravity_volume(self, space, arbiter):
+        self.handle_gvol_collision(space, arbiter)
+        if not self.on_ground():
+            self.swap_keys()
+        return True
+        
 
     def handle_gvol_collision(self, space, arbiter):
         gvol_shape, shape = arbiter.shapes
@@ -171,6 +185,13 @@ class Game(object):
                 self.last_on_ground = DOWN_HILL_GRACE
                 return True
         return False
+    
+    def swap_keys(self):
+        if abs(Vec2d(0,-1).get_angle_between(self.player.body.force)) > math.pi/2.0:
+            self.swap_lr = True
+        else:
+            self.swap_lr = False
+        
 
     def handle_input(self):
         for e in pygame.event.get():
@@ -210,8 +231,10 @@ class Game(object):
                         self.mode_gvol = not self.mode_gvol
                 elif e.key == K_LEFT:
                     self.move_left = True
+                    self.swap_keys()
                 elif e.key == K_RIGHT:
                     self.move_right = True
+                    self.swap_keys()
                 elif e.key == K_SPACE and self.on_ground():
                     self.jump = True
                     self.jump_time = JUMP_TIME
@@ -278,8 +301,10 @@ class Game(object):
                     self.move_right = False
                 elif x == 1:
                     self.move_right = True
+                    self.swap_keys()
                 elif x == -1:
                     self.move_left = True
+                    self.swap_keys()
             elif e.type == JOYAXISMOTION:
                 if e.axis == 0:
                     if e.value < DEADZONE and e.value > -DEADZONE:
@@ -287,8 +312,10 @@ class Game(object):
                         self.move_right = False
                     elif e.value >= DEADZONE:
                         self.move_right = True
+                        self.swap_keys()
                     elif e.value <= -DEADZONE:
                         self.move_left = True
+                        self.swap_keys()
             elif e.type == JOYBUTTONDOWN:
                 if e.button == 1 and self.on_ground():
                     self.jump = True
@@ -341,7 +368,9 @@ class Game(object):
             self.player.body.reset_forces()
             self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         speed = 0
-        if abs(Vec2d(0,-1).get_angle_between(self.player.body.force)) > math.pi/2.0:
+        if self.set_keys_later:
+            self.swap_keys()
+        if self.swap_lr:
             m_left, m_right = self.move_right, self.move_left
         else:
             m_left, m_right = self.move_left, self.move_right
