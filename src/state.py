@@ -69,3 +69,24 @@ def game_over(screen,clock):
                 return 4
     clock.tick(10)
     pygame.display.flip()
+    return 3
+
+def win(screen,clock):
+    height = screen.get_height()
+    width = screen.get_width()
+    screen.fill((150,150,150))
+    font = pygame.font.SysFont('helvetica',60)
+    font.set_bold(True)
+    gameover=font.render('You Win!',True,(80,80,255))
+    screen.blit(gameover,\
+            ((width-gameover.get_width())*.5,(height-gameover.get_height())*.5))
+
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            exit()
+        if e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_RETURN:
+                return 4
+    clock.tick(10)
+    pygame.display.flip()
+    return 5

@@ -19,13 +19,13 @@ class Particle(object):
         self.shape.collision_type = COLLTYPE_PARTICLE
         
     def draw(self, screen, game):
-        pygame.draw.circle(screen, (255,0,0), game.world2screen(self.body.position), 1)
+        pygame.draw.circle(screen, (50,50,255), game.world2screen(self.body.position), 1)
                 
 
 class Emitter(object):
     
     def __init__(self, position, period):
-        self.position = position
+        self.position = (position[0], position[1])
         self.period = period
         self.counter = 0
         

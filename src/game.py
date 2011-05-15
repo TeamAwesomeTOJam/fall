@@ -17,6 +17,7 @@ class Game(object):
 
     def __init__(self):
         self.game_over = False
+        self.win = False
         self.camera_pos = Vec2d(0,0)
         
         self.on_screen = []
@@ -100,7 +101,7 @@ class Game(object):
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, self.hit_and_gravity_volume, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, self.handle_gvol_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
-        self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_GOAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
         
     def set_screen_shape(self):
         if self.screen_shape:
@@ -133,6 +134,7 @@ class Game(object):
         return True
     
     def handle_goal_collision(self, space, arbiter):
+        self.win = True
         return True
 
     def handle_gvol_collision(self, space, arbiter):
@@ -448,6 +450,8 @@ class Game(object):
         
         if self.game_over:
             return 3
+        elif self.win:
+            return 5
         else:
             return 1
     
