@@ -6,6 +6,8 @@ import pymunk
 from settings import *
 from stickman import StickMan, Animation
 
+import math
+
 class Player(object):
 
     def __init__(self, game):
@@ -32,7 +34,6 @@ class Player(object):
         self.model = StickMan(os.path.join(RES, 'animations.pickle'))
         self.model.set_default_animation(0)
         self.dir = 1
-        self.orientation = 1
     
     def update(self, dt):
         self.model.update(dt)
@@ -49,21 +50,19 @@ class Player(object):
     def jump(self):
         self.model.play_animation(2)
     
-    def flip(self):
-        self.orientation *= -1
         
     def draw(self, screen):
         surf = self.model.draw()
         #print self.body.velocity
-        if self.body.velocity.x < -1*FLIP_THRESHOLD:
+        if self.body.velocity.rotated(-1*self.game.player.body.force.angle - math.pi/2).x < -1*FLIP_THRESHOLD:
             self.dir = -1
-        elif self.body.velocity.x > FLIP_THRESHOLD:
+        elif self.body.velocity.rotated(-1*self.game.player.body.force.angle - math.pi/2).x > FLIP_THRESHOLD:
             self.dir = 1
         if self.dir == -1:
             surf = pygame.transform.flip(surf, True, False)
         
-        if self.orientation == -1:
-            surf = pygame.transform.flip(surf, False, True)
+        surf = pygame.transform.rotozoom(surf, self.game.player.body.force.rotated(math.pi/2.0).get_angle_degrees(),1)
+        #surf = pygame.transform.rotate(surf, math.pi/2.0)
         x, y = self.game.world2screen(self.body.position)
         x -= surf.get_width() / 2.0
         y -= surf.get_height() - PLAYER_RADIUS - 8 
