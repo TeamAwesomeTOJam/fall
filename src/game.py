@@ -402,8 +402,10 @@ class Game(object):
         if self.on_ground():
             v.x = speed
         else:
-            if speed:
-                v.x = speed
+            if speed > 0 and v.x < speed:
+                v.x += AIR_CONTROL
+            elif speed < 0 and v.x > speed:
+                v.x -= AIR_CONTROL
         v.rotate(self.player.body.force.angle + math.pi/2)
         self.player.body.velocity = v
         #print v
