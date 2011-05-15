@@ -61,7 +61,9 @@ class game(object):
         #gravity polygons
         self.mode_gvol=False
         self.mode_grav_vec=False
+        self.mode_grav_poly=False#check whether we've used this poly yet in list
         self.grav_set=False
+        self.grav_vec=None
         self.poly_verts=[]
         #gravitate
         self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
@@ -164,12 +166,16 @@ class game(object):
                         self.level.save_level(self.level_path)
                     elif e.key == K_RETURN and self.mode_gvol:
                         self.mode_grav_vec = not self.mode_grav_vec
+                        self.pos_start=None
+                        self.pos_end=None
                     elif e.key == K_g :
                         if self.mode_gvol:#stopping gravity volume
                             self.grav_set=True
                         else: #starting gravity volume
                             self.mode_grav_vec=False
-
+                            self.grav_set=False
+                            self.poly_verts=[]
+                            self.grav_vec=None
                         self.mode_gvol = not self.mode_gvol
                 elif e.key == K_LEFT:
                     self.move_left = True
@@ -202,6 +208,7 @@ class game(object):
                     self.jump = False
             elif e.type == pygame.MOUSEBUTTONDOWN and self.mode_edit:
                 if e.button == 1:
+                    self.mode_grav_poly=True
 
                     pos_snap=self.level.check_snap(self.screen2world(e.pos),self.snap_radius)
                     if pos_snap is not None:
@@ -318,21 +325,17 @@ class game(object):
                 if self.snap_radius<1: self.snap_radius=1
             if self.inc_snap_radius:
                 self.snap_radius+=1
-            if self.grav_set:#doing gravity volume stuff
-                
-                if self.mode_gvol:
-                    if self.mode_grav_vec and self.pos_start is not None and self.pos_end is not None:
-                        self.mode_grav_vec = (self.pos_end[0]-self.pos_start[0], self.pos_end[1]-self.pos_start[1])
-                    else:
-                        self.poly_verts.append(pos)
-                        self.pos_end=self.pos_start
-                        self.pos_start=None
-                if self.mode_grav_vec is not None and self.poly_verts!=[]:
-                    self.level.add_gvol(self.poly_verts,self.mode_grav_vec)
-                else:
-                    self.poly_verts=[]
-                    self.mode_grav_vec=False
-                self.grav_set=False
+            if self.mode_gvol:#doing gravity volume stuff
+               
+                #gravity vector mode, endpoints are defined
+                if self.mode_grav_vec and self.pos_start is not None and self.pos_end is not None:
+                    self.grav_vec =  (self.pos_end[0]-self.pos_start[0], self.pos_end[1]-self.pos_start[1])
+                    self.pos_start=None
+                    self.pos_end=None
+                elif self.mode_grav_vec is False and self.mode_grav_poly and self.pos_start is not None:#not doing gravity vector
+                    self.poly_verts.append((self.pos_start[0],self.pos_start[1]))
+                    self.mode_grav_poly=False
+            #think gravity was set: add gravity object and clear our vars
             elif self.pos_start is not None and self.pos_end is not None:
                 body = pm.Body(pm.inf, pm.inf)
                 shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
@@ -341,6 +344,11 @@ class game(object):
                 self.level.add_line(level.line(self.pos_start, self.pos_end, shape))
                 self.pos_start = None
                 self.pos_end= None
+            if self.grav_set and self.mode_grav_vec is not None and self.poly_verts!=[]:
+                print self.poly_verts,self.grav_vec
+                self.level.add_gvol(self.poly_verts,self.grav_vec)
+                self.poly_verts=[]
+                self.grav_vec=None
 
         self.player.update(time)
         self.physics(time)
@@ -395,6 +403,12 @@ class game(object):
                 if self.mode_grav_vec: cmds.append("Draw Gravity Vector")
                 else: cmds.append("Draw Gravity Polygon")
             font = pygame.font.SysFont('helvetica',14)
+            for i in xrange(len(self.poly_verts)):
+                pygame.draw.line(screen, (0,0,255), \
+                        self.world2screen(self.poly_verts[i]),self.world2screen(self.poly_verts[(i+1)%len(self.poly_verts)]),10)
+
+
+
             for i in xrange(len(cmds)):
                 cmd=cmds[i]
                 surf=font.render(cmd,True,(40,40,40))
