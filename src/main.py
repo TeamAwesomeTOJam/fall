@@ -10,6 +10,8 @@ def main():
         pygame.joystick.Joystick(0).init()
     screen = pygame.display.set_mode((WIDTH,HEIGHT))
     clock = pygame.time.Clock()
+    game = None
+    level_idx = 0
 
     a = Attract()
 

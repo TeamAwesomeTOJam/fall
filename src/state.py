@@ -114,4 +114,4 @@ def win(screen,clock):
                 return 0
     clock.tick(10)
     pygame.display.flip()
-    return 4
+    return 5
