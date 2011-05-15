@@ -41,7 +41,7 @@ class game(object):
         self.level_path = os.path.join(RES, 'level.pickle')
         try:
             self.level = level.load_level(self.level_path)
-        except IOError:
+        except:
             self.level = level.level()
             
         #PHYSICS!!!!
