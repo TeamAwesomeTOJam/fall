@@ -27,6 +27,7 @@ class Coin(object):
         
     def draw(self, screen, game):
         if not self.picked_up:
-            pygame.draw.circle(screen, (192,192,10), game.world2screen(self.body.position), 8)
+            pygame.draw.circle(screen, (2,107,251), game.world2screen(self.body.position), 8)
+            pygame.draw.circle(screen, (85,155,255), game.world2screen(self.body.position), 4)
 
         
