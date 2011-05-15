@@ -14,7 +14,7 @@ class Portal(object):
     def _init_pymunk(self):
         self.body = pymunk.Body(pymunk.inf, pymunk.inf)
         self.body.position = self.position
-        self.shape = pymunk.Circle(self.body, 50)
+        self.shape = pymunk.Circle(self.body, 30)
         self.shape.collision_type = COLLTYPE_GOAL
         
     def __getstate__(self):
