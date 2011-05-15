@@ -25,6 +25,10 @@ class Player(object):
         self.model = StickMan(os.path.join(RES, 'animations.pickle'))
         self.model.set_default_animation(0)
         self.dir = 1
+        
+        self.collisions = []
+        self.last_on_ground = 0
+        self.gravity_set = False
     
     def update(self, dt):
         self.model.update(dt)

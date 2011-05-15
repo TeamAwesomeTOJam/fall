@@ -17,6 +17,7 @@ class Particle(object):
         self.body.velocity = velocity
         self.shape = pymunk.Circle(self.body, 1)
         self.shape.collision_type = COLLTYPE_PARTICLE
+        self.gravity_set = False
         
     def draw(self, screen, game):
         pygame.draw.circle(screen, (50,50,255), game.world2screen(self.body.position), 1)

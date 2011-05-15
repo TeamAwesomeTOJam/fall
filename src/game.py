@@ -21,10 +21,7 @@ class Game(object):
         self.camera_pos = Vec2d(0,0)
         
         self.on_screen = []
-        self.player_collisions = []
-        
         self.particles = []
-        
         self.shape_map = {}
         
         self.pan_left = False
@@ -41,8 +38,6 @@ class Game(object):
         self.swap_lr = False
         self.set_keys_later = False
         
-        self.last_on_ground = 0
-
         #Editor events
         self.mode_edit=False
         self.cmd_x=0
@@ -85,9 +80,6 @@ class Game(object):
         self.grav_set=False
         self.grav_vec=None
         self.poly_verts=[]
-
-        #gravitate
-        self.gravity_set = False
         
         #the player
         self.player = Player(self)
@@ -101,7 +93,7 @@ class Game(object):
         
         self.space.set_default_collision_handler(None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
-        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, self.enter_gravity_volume, self.hit_and_gravity_volume, None, self.leave_gravity_volume)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, self.enter_gravity_volume, self.handle_gvol_collision, None, self.leave_gravity_volume)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, self.handle_gvol_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_GOAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
@@ -122,14 +114,10 @@ class Game(object):
         elif s2 == self.screen_shape:
             self.on_screen.append(s1)
         return False
-    
-    def hit_and_gravity_volume(self, space, arbiter):
-        self.gravity_set = True
-        return self.handle_gvol_collision(space, arbiter)
         
     def collect_player_collisions(self, space, arbiter):
         for c in arbiter.contacts:
-            self.player_collisions.append(c.position)
+            self.player.collisions.append(c.position)
         return True
     
     def handle_lethal_collision(self, space, arbiter):
@@ -149,11 +137,12 @@ class Game(object):
         if not self.on_ground():
             self.swap_keys()
         return True
-        
 
     def handle_gvol_collision(self, space, arbiter):
         gvol_shape, shape = arbiter.shapes
         gvol = self.shape_map[gvol_shape]
+        obj = self.shape_map[shape]
+        obj.gravity_set = True
         body = shape.body
         body.reset_forces()
         body.apply_force((gvol.g[0] * body.mass, gvol.g[1] * body.mass))
@@ -176,15 +165,15 @@ class Game(object):
         return Vec2d((x-w/2) + rx,-1*(y-h/2)+ry)
     
     def on_ground(self):
-        if self.last_on_ground > 0:
+        if self.player.last_on_ground > 0:
             return True
-        for c in self.player_collisions:
+        for c in self.player.collisions:
             body_loc = self.player.body.world_to_local(c)
             #p = self.player.shape.body.position
             #a = (c - p).get_angle_degrees()
             #if abs(a + 90) < PLAYER_GROUND_COLLISION_ANGLE:
             if abs(body_loc.y - self.player.pts[0][1]) < 3:
-                self.last_on_ground = DOWN_HILL_GRACE
+                self.player.last_on_ground = DOWN_HILL_GRACE
                 return True
         return False
     
@@ -351,7 +340,7 @@ class Game(object):
         allow_left = True
         allow_right = True
         #print 'collisions'
-        for c in self.player_collisions:
+        for c in self.player.collisions:
             body_loc = self.player.body.world_to_local(c)
             #print body_loc
             #p = self.player.shape.body.position
@@ -366,7 +355,7 @@ class Game(object):
             
         #control the player
         
-        if not self.gravity_set:
+        if not self.player.gravity_set:
             self.player.body.reset_forces()
             self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
         speed = 0
@@ -385,8 +374,8 @@ class Game(object):
             self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME).rotated(self.player.body.force.angle + math.pi/2))
             self.jump_time -= time
         
-        if self.last_on_ground > 0:
-            self.last_on_ground -= time
+        if self.player.last_on_ground > 0:
+            self.player.last_on_ground -= time
         
         if speed and self.on_ground():
             self.player.walk()
@@ -463,6 +452,9 @@ class Game(object):
         
         dead_particles = []
         for i, p in enumerate(self.particles):
+            if not p.gravity_set:
+                p.body.reset_forces()
+                p.body.apply_force(Vec2d(0.0, -900 * p.body.mass))
             p.ttl -= time
             if p.ttl < 0:
                 dead_particles.append(i)
@@ -488,8 +480,10 @@ class Game(object):
     
     def physics(self,time):
         self.set_screen_shape()
-        self.player_collisions = []
-        self.gravity_set = False
+        self.player.collisions = []
+        self.player.gravity_set = False
+        for particle in self.particles:
+            particle.gravity_set = False
         self.space.step(time)
     
     def draw(self,screen):
