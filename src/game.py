@@ -93,7 +93,15 @@ class Game(object):
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
         self.shape_map[self.player.shape] = self.player
+
+        #the mouse
+        mouse_body=pm.Body(pm.inf,pm.inf)
+        mouse_shape=pm.Circle(mouse_body,3,Vec2d(0,0))
+        mouse_shape.collision_type=COLLTYPE_MOUSE
         
+        self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_MOUSE, self.del_line,None,None,None)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_MOUSE, self.del_grav,None,None,None)
+        self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_MOUSE, self.del_lethal,None,None,None)
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
         self.screen_shape = None
@@ -158,6 +166,14 @@ class Game(object):
         body.reset_forces()
         body.apply_force((gvol.g[0] * body.mass, gvol.g[1] * body.mass))
         return False
+
+    def del_line(self, space, arbiter):
+        line_shape,mouse=arbiter.shapes
+        line = self.shape_map[line_shape]
+        self.level.dec_or_del(line.start)
+        self.level.dec_or_del(line.end)
+        del self.shape_map[line_shape]
+        return False 
 
     def world2screen(self,v):
         x,y = v
