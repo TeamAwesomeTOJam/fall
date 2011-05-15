@@ -4,8 +4,8 @@ import pygame
 from pymunk import Vec2d
 import pymunk as pm
 from pygame.locals import *
-from level import level
 from player import Player
+import level
 import gravityvolume
 
 
@@ -38,9 +38,12 @@ class game(object):
         self.snap_radius=5.0
         self.dec_snap_radius=0
         self.inc_snap_radius=0
-        self.level_path=os.path.join(RES, 'level.pickle')
-        self.level = level()
-        
+        self.level_path = os.path.join(RES, 'level.pickle')
+        try:
+            self.level = level.load_level(self.level_path)
+        except IOError:
+            self.level = level.level()
+            
         #PHYSICS!!!!
         pm.init_pymunk()
         self.space = pm.Space()
@@ -50,6 +53,8 @@ class game(object):
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
 
+        for line in self.level.lines.iterkeys():
+            self.space.add_static(self.level.lines[line].shape)
 
         #gravity polygons
         self.mode_poly=False
@@ -70,12 +75,9 @@ class game(object):
         self.space.add_collision_handler(COLLTYPE_SCREEN, COLLTYPE_PLAYER, None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, gravityvolume.handle_collision, None, None)
-        
-        self.level.load_level(self.level_path)
-        for line in self.level.lines.iterkeys():
-            self.space.add_static(self.level.lines[line].shape)
-    
-        #self.level = 
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_DEFAULT, None, gravityvolume.handle_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
         
     def set_screen_shape(self):
         if self.screen_shape:
@@ -86,7 +88,6 @@ class game(object):
         self.space.add(self.screen_shape)
         self.on_screen = []
         
-    
     def collide_screen(self, space, arbiter):
         s1,s2 = arbiter.shapes
         self.on_screen.append(s2)
@@ -99,8 +100,12 @@ class game(object):
         for c in arbiter.contacts:
             self.player_collisions.append(c.position)
         return True
-        
-
+    
+    def handle_lethal_collision(self, space, arbiter):
+        return True
+    
+    def handle_goal_collision(self, space, arbiter):
+        return True
 
     def world2screen(self,v):
         x,y = v
@@ -299,7 +304,7 @@ class game(object):
                 shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
                 shape.friction = 1.0
                 self.space.add_static(shape)
-                self.level.add_line(self.pos_start,self.pos_end,shape)
+                self.level.add_line(level.line(self.pos_start, self.pos_end, shape))
                 self.pos_start = None
                 self.pos_end= None
 
@@ -355,7 +360,11 @@ class game(object):
         #Draw other stuff
         for shape in self.on_screen:
             line = self.level.get_line(shape)
-            pygame.draw.line(screen, (180,180,180), self.world2screen(line.start),self.world2screen(line.end),10)
+            if line.lethal:
+                color = (255, 0, 0)
+            else:
+                color = (180, 180, 180)
+            pygame.draw.line(screen, color, self.world2screen(line.start),self.world2screen(line.end),10)
 
         pygame.display.flip()
         
