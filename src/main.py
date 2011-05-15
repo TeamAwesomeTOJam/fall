@@ -12,7 +12,7 @@ def main():
     clock = pygame.time.Clock()
 
     g = Game()
-    a = Atrract
+    a = Attract()
 
     state = 0
     while 1:

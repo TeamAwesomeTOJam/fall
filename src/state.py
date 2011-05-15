@@ -1,5 +1,7 @@
 import pygame
 from stickman import StickMan, Animation
+import os
+from settings import *
 
 class Attract(object):
 
@@ -13,6 +15,7 @@ class Attract(object):
         width = screen.get_width()
         screen.fill((150,150,150))
         font = pygame.font.SysFont('helvetica',60)
+        font = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
         font.set_bold(True)
         press=font.render('Press',True,(255,0,0))
         start=font.render('ENTER',True,(255,0,0))
@@ -23,7 +26,7 @@ class Attract(object):
         
         self.model.update(time)
         surf = self.model.draw()
-        screen.blit(surf, (width/2, height/2))
+        screen.blit(surf, (width/2 + 50, height/2 + 50))
         
         
         for e in pygame.event.get():
