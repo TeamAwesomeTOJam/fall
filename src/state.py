@@ -3,19 +3,21 @@ from stickman import StickMan, Animation
 import os
 from settings import *
 
+
+
 class Attract(object):
 
     def __init__(self):
         self.model = StickMan(os.path.join(RES, 'animations.pickle'))
         self.model.set_default_animation(1)
+        self.font_big = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
 
     def attract(self,screen,clock):
         time = clock.tick(60)/1000.0
         height = screen.get_height()
         width = screen.get_width()
-        screen.fill((150,150,150))
-        font = pygame.font.SysFont('helvetica',60)
-        font = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
+        screen.fill((0,0,0))
+        #font = pygame.font.SysFont('helvetica',60)
         #font.set_bold(True)
         #press=font.render('Press',True,(255,0,0))
         #start=font.render('ENTER',True,(255,0,0))
@@ -24,6 +26,8 @@ class Attract(object):
         #screen.blit(start,\
         #        ((width-start.get_width())*.5,height*.5))
         
+        title = self.font_big.render('FALL', True, (255,255,255))
+        screen.blit(title,((width - title.get_width())/2, (height - title.get_height())/2 - 100))
         self.model.update(time)
         surf = self.model.draw()
         screen.blit(surf, (width/2 + 50, height/2 + 50))
@@ -51,9 +55,10 @@ def pause(screen,clock):
     rect.fill((0,0,0))
     rect.set_alpha(40)
     ingameSurface.blit(rect,(0,0))
-    font = pygame.font.SysFont('helvetica',60)
-    font.set_bold(True)
-    pause=font.render('Paused',True,(255,0,0))
+    #font = pygame.font.SysFont('helvetica',60)
+    #font.set_bold(True)
+    font_big = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
+    pause=font_big.render('Paused',True,(255,0,0))
     screen.blit(pause,\
             ((width-pause.get_width())*.5,(height-pause.get_height())*.5))
     for e in pygame.event.get():
@@ -70,10 +75,11 @@ def pause(screen,clock):
 def game_over(screen,clock):
     height = screen.get_height()
     width = screen.get_width()
-    screen.fill((150,150,150))
-    font = pygame.font.SysFont('helvetica',60)
-    font.set_bold(True)
-    gameover=font.render('Game Over',True,(255,0,0))
+    screen.fill((0,0,0))
+    #font = pygame.font.SysFont('helvetica',60)
+    #font.set_bold(True)
+    font_big = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
+    gameover=font_big.render('Game Over',True,(255,0,0))
     screen.blit(gameover,\
             ((width-gameover.get_width())*.5,(height-gameover.get_height())*.5))
 
@@ -92,10 +98,11 @@ def game_over(screen,clock):
 def win(screen,clock):
     height = screen.get_height()
     width = screen.get_width()
-    screen.fill((150,150,150))
-    font = pygame.font.SysFont('helvetica',60)
-    font.set_bold(True)
-    gameover=font.render('You Win!',True,(80,80,255))
+    screen.fill((0,0,0))
+    #font = pygame.font.SysFont('helvetica',60)
+    #font.set_bold(True)
+    font_big = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
+    gameover=font_big.render('You Win!',True,(80,80,255))
     screen.blit(gameover,\
             ((width-gameover.get_width())*.5,(height-gameover.get_height())*.5))
 
