@@ -7,6 +7,7 @@ from pygame.locals import *
 from player import Player
 import level
 import gravityvolume
+import math
 import particles
 
 
@@ -71,7 +72,7 @@ class game(object):
         self.grav_vec=None
         self.poly_verts=[]
         #gravitate
-        self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass))
+        self.player.body.apply_force(Vec2d(0.0, -900 * self.player.body.mass).rotated(math.pi/4))
         
         # make a test gravity volume
 #        g = gravityvolume.GravityVolume([(-3000, 3000), (3000, 3000), (3000, -3000), (-3000, -3000)], (900, 900))
@@ -310,7 +311,7 @@ class game(object):
             speed += PLAYER_SPEED
         
         if self.jump and self.jump_time > 0:
-            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME))
+            self.player.body.apply_impulse(Vec2d(0,self.jump_time*JUMP_STRENGTH/JUMP_TIME).rotated(self.player.body.force.angle + math.pi/2))
             self.jump_time -= time
         
         if self.last_on_ground > 0:
@@ -322,10 +323,17 @@ class game(object):
             self.player.idle()
         else:
             self.player.fly()
-            
-        self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
-            
-        self.player.body.angle = 0
+        
+        #print Vec2d(self.player.body.force).rotated(-1*self.player.body.force.angle - math.pi/2).get_angle_degrees()
+        #self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
+        v = Vec2d(self.player.body.velocity)
+        v.rotate(-1*self.player.body.force.angle - math.pi/2)
+        v.x = speed
+        v.rotate(self.player.body.force.angle + math.pi/2)
+        self.player.body.velocity = v
+        #print v
+        
+        self.player.body.angle = self.player.body.force.rotated(math.pi/2.0).angle
         self.player.body.angular_velocity = 0
         
         if self.mode_edit:
@@ -408,9 +416,9 @@ class game(object):
 #        pygame.draw.line(screen, (255,0,0), p, p+p2)
 #        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
         
-        #points = self.player.shape.get_points()
-        #flipped = map(self.world2screen,points)
-        #pygame.draw.polygon(screen,(0,0,255),flipped,1)
+        points = self.player.shape.get_points()
+        flipped = map(self.world2screen,points)
+        pygame.draw.polygon(screen,(0,0,255),flipped,1)
         
         #for p in self.player_collisions:
         #    pygame.draw.circle(screen, (255,0,0) , self.world2screen(p),3,0)
