@@ -7,7 +7,7 @@ from settings import *
 from gravityvolume import *
 
 
-class line(object):
+class Line(object):
     
     def __init__(self, start, end, shape, lethal=False):
         self.start = start
@@ -39,7 +39,7 @@ class line(object):
         pygame.draw.line(screen, color, game.world2screen(self.start), game.world2screen(self.end), 10)
 
 
-class level(object):
+class Level(object):
     
     def __init__(self):
         self.goal = None
@@ -63,9 +63,9 @@ class level(object):
         self.add_or_inc(self.snaps, (line.start[0], line.start[1]))
         self.add_or_inc(self.snaps, (line.end[0], line.end[1]))
 
-    def add_gvol(self,vert_list,grav):
-        self.gvols.append(GravityVolume(vert_list, grav))
-        for m in vert_list:
+    def add_gvol(self, gvol):
+        self.gvols.append(gvol)
+        for m in gvol.vertices:
             self.add_or_inc(self.snaps,(m[0],m[1]))
 
     def resnap(self):

@@ -12,7 +12,7 @@ import particles
 from gravityvolume import GravityVolume
 
 
-class game(object):
+class Game(object):
 
     def __init__(self):
         self.game_over = False
@@ -59,7 +59,7 @@ class game(object):
         try:
             self.level = level.load_level(self.level_path)
         except:
-            self.level = level.level()
+            self.level = level.Level()
 
         for line in self.level.lines:
             self.shape_map[line.shape] = line
@@ -92,7 +92,7 @@ class game(object):
         self.space.set_default_collision_handler(None, self.ignore_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_DEFAULT, COLLTYPE_PLAYER, None, self.collect_player_collisions, None, None)
         self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PLAYER, None, self.hit_and_gravity_volume, None, None)
-        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, gravityvolume.handle_collision, None, None)
+        self.space.add_collision_handler(COLLTYPE_GRAVITY, COLLTYPE_PARTICLE, None, self.handle_gvol_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_lethal_collision, None, None)
         self.space.add_collision_handler(COLLTYPE_LETHAL, COLLTYPE_PLAYER, None, self.handle_goal_collision, None, None)
         
@@ -115,9 +115,8 @@ class game(object):
     
     def hit_and_gravity_volume(self, space, arbiter):
         self.gravity_set = True
-        return gravityvolume.handle_collision(space, arbiter)
+        return self.handle_gvol_collision(space, arbiter)
         
-    
     def collect_player_collisions(self, space, arbiter):
         for c in arbiter.contacts:
             self.player_collisions.append(c.position)
@@ -129,6 +128,14 @@ class game(object):
     
     def handle_goal_collision(self, space, arbiter):
         return True
+
+    def handle_gvol_collision(self, space, arbiter):
+        gvol_shape, shape = arbiter.shapes
+        gvol = self.shape_map[gvol_shape]
+        body = shape.body
+        body.reset_forces()
+        body.apply_force((gvol.g[0] * body.mass, gvol.g[1] * body.mass))
+        return False
 
     def world2screen(self,v):
         x,y = v
@@ -373,14 +380,18 @@ class game(object):
                 shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
                 shape.friction = 1.0
                 self.space.add_static(shape)
-                self.level.add_line(level.line(self.pos_start, self.pos_end, shape))
+                line = level.Line(self.pos_start, self.pos_end, shape)
+                self.level.add_line(line)
+                self.shape_map[shape] = line
                 self.pos_start = None
-                self.pos_end= None
-            if self.grav_set and self.mode_grav_vec is not None and self.poly_verts!=[]:
-                self.level.add_gvol(map(lambda x:(x[0],x[1]),self.poly_verts),self.grav_vec)
+                self.pos_end = None
+            if self.grav_set and self.mode_grav_vec is not None and self.poly_verts != []:
+                gvol = GravityVolume(self.poly_verts, self.grav_vec)
+                self.level.add_gvol(gvol)
+                self.shape_map[gvol.shape] = gvol
                 self.space.add_static(self.level.gvols[-1].shape)
-                self.poly_verts=[]
-                self.grav_vec=None
+                self.poly_verts = []
+                self.grav_vec = None
 
         self.player.update(time)
         
@@ -463,9 +474,9 @@ class game(object):
         #Draw other stuff
         for shape in self.on_screen:
             obj = self.shape_map.get(shape, None)
-            if isinstance(obj, level.line) or isinstance(obj, particles.Particle):
+            if isinstance(obj, level.Line) or isinstance(obj, particles.Particle):
                 obj.draw(screen, self)
-            if isinstance(obj, GravityVolume) or isinstance(obj, particles.Emitter):
+            elif isinstance(obj, GravityVolume) or isinstance(obj, particles.Emitter):
                 if self.mode_edit:
                     obj.draw(screen, self)
 

@@ -1,7 +1,7 @@
 import pygame
 from state import *
 from settings import *
-from game import game
+from game import Game
 from stickman import *
 
 def main():
@@ -11,7 +11,7 @@ def main():
     screen = pygame.display.set_mode((WIDTH,HEIGHT),0,32)
     clock = pygame.time.Clock()
 
-    g = game()
+    g = Game()
 
     state=0
     while 1:
