@@ -350,7 +350,11 @@ class Game(object):
         #self.player.body.velocity = Vec2d(speed, self.player.body.velocity[1])
         v = Vec2d(self.player.body.velocity)
         v.rotate(-1*self.player.body.force.angle - math.pi/2)
-        v.x = speed
+        if self.on_ground():
+            v.x = speed
+        else:
+            if speed:
+                v.x = speed
         v.rotate(self.player.body.force.angle + math.pi/2)
         self.player.body.velocity = v
         #print v
