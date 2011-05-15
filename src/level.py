@@ -51,8 +51,16 @@ class Level(object):
     def save_level(self, path):
         outfile = open(path, 'wb')
         pickle.dump(self, outfile)
+
+    def dec_or_del(self,v,dict=None):
+        if dict is None: dict=self.snaps
+        if v in dict:
+            dict[v]-=1
+            if dict[v]<1:
+                del dict[v]
         
-    def add_or_inc(self,dict,v):
+    def add_or_inc(self,v,dict=None):
+        if dict is None: dict=self.snaps
         if v in dict:
             dict[v]+=1
         else:
@@ -60,13 +68,13 @@ class Level(object):
 
     def add_line(self, line):
         self.lines.append(line)
-        self.add_or_inc(self.snaps, (line.start[0], line.start[1]))
-        self.add_or_inc(self.snaps, (line.end[0], line.end[1]))
+        self.add_or_inc( (line.start[0], line.start[1]))
+        self.add_or_inc((line.end[0], line.end[1]))
 
     def add_gvol(self, gvol):
         self.gvols.append(gvol)
         for m in gvol.vertices:
-            self.add_or_inc(self.snaps,(m[0],m[1]))
+            self.add_or_inc((m[0],m[1]))
     
     def add_emitter(self, emitter):
         self.emitters.append(emitter)
@@ -77,8 +85,8 @@ class Level(object):
     def resnap(self):
         self.snaps={}
         for line in self.lines:
-            self.add_or_inc(self.snaps, (line.start[0], line.start[1]))
-            self.add_or_inc(self.snaps, (line.end[0], line.end[1]))
+            self.add_or_inc((line.start[0], line.start[1]))
+            self.add_or_inc((line.end[0], line.end[1]) )
         
     def check_snap(self,u,r):
         for v in self.snaps.iterkeys():
