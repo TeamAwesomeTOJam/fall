@@ -18,10 +18,14 @@ class GravityVolume(object):
         self.shape.collision_type = COLLTYPE_GRAVITY
         GravityVolume.volumes[self.shape] = self
         
-    def _clear_pymunk(self):
-        del GravityVolume.volumes[self.shape]
-        self.body = None
-        self.shape = None
+    def __getstate__(self):
+        return {'vertices' : [(v[0], v[1]) for v in self.vertices],
+                'g' : (self.g[0], self.g[1])}
+    
+    def __setstate__(self, state):
+        self.vertices = state['vertices']
+        self.g = state['g']
+        self._init_pymunk()
 
 
 def handle_collision(space, arbiter):
