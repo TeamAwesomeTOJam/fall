@@ -13,7 +13,7 @@ def main():
 
     g = Game()
 
-    state=0
+    state = 0
     while 1:
         if state == 0:
             state = attract(screen,clock)
@@ -25,5 +25,7 @@ def main():
             state = game_over(screen,clock)
         if state == 4:
             exit()
+        if state == 5:
+            state = win(screen, clock)
 
 if __name__ == '__main__': main()
