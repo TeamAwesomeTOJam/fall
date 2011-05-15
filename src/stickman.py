@@ -83,6 +83,7 @@ class StickMan(object):
         self.frame_elapsed = 0
         self.prev_frame = self.animation[self.frame_index]
         self.next_frame = self.animation[(self.frame_index + 1) % len(self.animation)]
+        print self.prev_frame
 
     def update(self, dt):
         self.frame_elapsed += dt

@@ -32,7 +32,9 @@ class Player(object):
         
         self.collisions = []
         self.last_on_ground = 0
+        self.was_on_ground = False
         self.gravity_set = False
+        self.last_gravity = self.body.force
     
     def update(self, dt):
         self.model.update(dt)

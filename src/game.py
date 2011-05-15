@@ -512,6 +512,17 @@ class Game(object):
                 
         self.physics(time)
         
+        if not self.player.was_on_ground and self.on_ground():
+            self.player.was_on_ground = True
+            self.player.land_sound.play()
+            self.player.model.play_animation(4)
+        elif not self.on_ground():
+            self.player.was_on_ground = False 
+        
+        if self.player.last_gravity != self.player.body.force:
+            self.player.gravity_sound.play()
+        self.player.last_gravity = Vec2d(self.player.body.force)
+        
         if not self.mode_edit:
             self.camera_pos = Vec2d(self.player.body.position)
         
