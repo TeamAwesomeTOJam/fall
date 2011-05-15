@@ -53,6 +53,7 @@ class Game(object):
         #Load Sounds
         self.music = pygame.mixer.Sound(os.path.join(RES, 'music.ogg'))
         self.win_sound = pygame.mixer.Sound(os.path.join(RES, 'win.ogg'))
+        self.win_sound.set_volume(0.6)
         self.lose_sound = pygame.mixer.Sound(os.path.join(RES, 'lose.ogg'))
         
         self.music.play(-1)
@@ -406,6 +407,12 @@ class Game(object):
         speed = 0
         if self.set_keys_later:
             self.swap_keys()
+            self.set_keys_later = False
+        elif abs(self.player.body.force.get_angle_between(self.player.last_gravity)) > math.pi/2:
+            #print 'hello'
+            self.swap_keys()
+        
+        #print self.player.body.force.get_angle_between(self.player.last_gravity)
         if self.swap_lr:
             m_left, m_right = self.move_right, self.move_left
         else:

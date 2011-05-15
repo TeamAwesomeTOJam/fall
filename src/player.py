@@ -29,6 +29,7 @@ class Player(object):
         self.jump_sound = pygame.mixer.Sound(os.path.join(RES, 'jump.ogg'))
         self.land_sound = pygame.mixer.Sound(os.path.join(RES, 'land.ogg'))
         self.gravity_sound = pygame.mixer.Sound(os.path.join(RES, 'gravity.ogg'))
+        self.gravity_sound.set_volume(0.3)
         
         self.collisions = []
         self.last_on_ground = 0
