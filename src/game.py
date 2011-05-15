@@ -371,20 +371,28 @@ class Game(object):
                     self.grav_vec =  (self.pos_end[0]-self.pos_start[0], self.pos_end[1]-self.pos_start[1])
                     self.pos_start=None
                     self.pos_end=None
-                elif self.mode_grav_vec is False and self.mode_grav_poly and self.pos_start is not None:#not doing gravity vector
+                #not doing gravity vector
+                elif self.mode_grav_vec is False and self.mode_grav_poly and self.pos_start is not None:
                     self.poly_verts.append((self.pos_start[0],self.pos_start[1]))
                     self.mode_grav_poly=False
-            #think gravity was set: add gravity object and clear our vars
+                    
+
             elif self.pos_start is not None and self.pos_end is not None:
                 body = pm.Body(pm.inf, pm.inf)
                 shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
                 shape.friction = 1.0
                 self.space.add_static(shape)
-                line = level.Line(self.pos_start, self.pos_end, shape)
+                if pygame.key.get_mods() & KMOD_SHIFT:
+                    lethal = True
+                else:
+                    lethal = False
+                line = level.Line(self.pos_start, self.pos_end, shape, lethal)
                 self.level.add_line(line)
                 self.shape_map[shape] = line
                 self.pos_start = None
                 self.pos_end = None
+                
+            #think gravity was set: add gravity object and clear our vars                
             if self.grav_set and self.mode_grav_vec is not None and self.poly_verts != []:
                 gvol = GravityVolume(self.poly_verts, self.grav_vec)
                 self.level.add_gvol(gvol)
