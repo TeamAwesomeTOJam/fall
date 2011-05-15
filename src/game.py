@@ -402,23 +402,15 @@ class game(object):
     def draw(self,screen):
         screen.fill((0,0,0))
 
-        for p in self.particles:
-            pygame.draw.circle(screen, (255,0,0), self.world2screen(p.body.position), 1)
+        # Draw start portal
+        ox, oy = self.world2screen((0,0))
+        pygame.draw.ellipse(screen, (255,237,3), pygame.Rect(ox - 30, oy - 60, 60, 120), 4)
+
+        for particle in self.particles:
+            particle.draw(screen, self)
 
         #Draw the player
-        self.player.draw(screen)
-#        r = self.player.shape.radius
-#        v = self.player.shape.body.position
-#        rot = self.player.shape.body.rotation_vector
-#        p = self.world2screen(v)
-#        p2 = Vec2d(rot.x, -rot.y) * r
-#        pygame.draw.circle(screen, (0,0,255), p, int(r), 2)
-#        pygame.draw.line(screen, (255,0,0), p, p+p2)
-#        pygame.draw.circle(screen, (0,0,255) , self.world2screen(Vec2d(0,0)), 20, 2)
-        
-        
-        #for p in self.player_collisions:
-        #    pygame.draw.circle(screen, (255,0,0) , self.world2screen(p),3,0)
+        self.player.draw(screen, self)
         
         if self.mode_edit:
             pos_snap=self.level.check_snap(self.pos_mouse,self.snap_radius)
@@ -452,12 +444,10 @@ class game(object):
             pygame.draw.polygon(screen,(0,0,255),flipped,1)
         
             for gvol in self.level.gvols:
-                points = gvol.shape.get_points()
-                flipped = map(self.world2screen,points)
-                pygame.draw.polygon(screen,(0,0,255),flipped,1)
+                gvol.draw(screen, self)
                 
             for emitter in self.level.emitters:
-                pygame.draw.circle(screen, (0,0,255), self.world2screen(emitter.position), 8, 2)
+                emitter.draw(screen, self)
 
         #Draw other stuff
         for shape in self.on_screen:

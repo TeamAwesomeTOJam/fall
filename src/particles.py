@@ -16,6 +16,9 @@ class Particle(object):
         self.body.velocity = velocity
         self.shape = pymunk.Circle(self.body, 1)
         self.shape.collision_type = COLLTYPE_PARTICLE
+        
+    def draw(self, screen, game):
+        pygame.draw.circle(screen, (255,0,0), game.world2screen(self.body.position), 1)
                 
 
 class Emitter(object):
@@ -35,4 +38,7 @@ class Emitter(object):
             p = Particle(pv)
             game.particles.append(p)
             game.space.add(p.body, p.shape)
+    
+    def draw(self, screen, game):
+        pygame.draw.circle(screen, (0,0,255), game.world2screen(self.position), 8, 2)
         

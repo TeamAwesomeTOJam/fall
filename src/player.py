@@ -41,9 +41,9 @@ class Player(object):
         self.model.play_animation(2)
     
         
-    def draw(self, screen):
+    def draw(self, screen, game):
         surf = self.model.draw()
-        
+        #print self.body.velocity
         if self.body.velocity.rotated(-1*self.game.player.body.force.angle - math.pi/2).x < -1*FLIP_THRESHOLD:
             self.dir = -1
         elif self.body.velocity.rotated(-1*self.game.player.body.force.angle - math.pi/2).x > FLIP_THRESHOLD:

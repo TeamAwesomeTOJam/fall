@@ -1,5 +1,6 @@
 import weakref
 
+import pygame
 import pymunk
 
 from settings import *
@@ -31,6 +32,11 @@ class GravityVolume(object):
         self.vertices = state['vertices']
         self.g = state['g']
         self._init_pymunk()
+        
+    def draw(self, screen, game):
+        points = self.shape.get_points()
+        flipped = map(game.world2screen, points)
+        pygame.draw.polygon(screen, (0,0,255), flipped, 1)
 
 
 def handle_collision(space, arbiter):
