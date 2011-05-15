@@ -62,9 +62,9 @@ class Player(object):
         if self.dir == -1:
             surf = pygame.transform.flip(surf, True, False)
         
-        diff = Vec2d(0,surf.get_height() / 2.0 - 28)
-        diff.rotate(self.game.player.body.force.rotated(math.pi/2.0).get_angle())
-        center = self.game.world2screen(self.body.position + diff)
+        diff = Vec2d(0,-1*surf.get_height() / 2.0 + 28)
+        diff.rotate(-1*self.game.player.body.force.rotated(math.pi/2.0).get_angle())
+        center = self.game.world2screen(self.body.position) + diff
         
         surf = pygame.transform.rotozoom(surf, self.game.player.body.force.rotated(math.pi/2.0).get_angle_degrees(),1)
         
@@ -75,6 +75,6 @@ class Player(object):
         #x -= surf.get_width() / 2.0
         #y -= surf.get_height() - PLAYER_RADIUS - 8 
         
-        screen.blit(surf, rect.topright)
+        screen.blit(surf, rect.topleft)
         
         
