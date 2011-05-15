@@ -160,22 +160,24 @@ class Game(object):
 
     def del_line(self, space, arbiter):
         if self.del_mode:
-            line_shape,mouse=arbiter.shapes
+            line_shape, mouse = arbiter.shapes
             line = self.shape_map[line_shape]
             self.level.dec_or_del(line.start)
             self.level.dec_or_del(line.end)
             del self.shape_map[line_shape]
             self.space.remove_static(line_shape)
+            self.level.lines.remove(line)
         return False 
 
     def del_gvol(self, space, arbiter):
         if self.del_mode:
-            gvol_shape,mouse=arbiter.shapes
+            gvol_shape, mouse = arbiter.shapes
             gvol = self.shape_map[gvol_shape]
             for m in gvol.vertices:
                 self.level.dec_or_del(m)
             del self.shape_map[gvol_shape]
             self.space.remove_static(gvol_shape)
+            self.level.gvols.remove(gvol)
         return False 
 
     def world2screen(self,v):
