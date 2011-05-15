@@ -10,6 +10,7 @@ import gravityvolume
 import math
 import particles
 from gravityvolume import GravityVolume
+import portal
 
 
 class Game(object):
@@ -68,6 +69,10 @@ class Game(object):
         for gvol in self.level.gvols:
             self.shape_map[gvol.shape] = gvol
             self.space.add_static(gvol.shape)
+        
+        if self.level.goal:
+            self.shape_map[self.level.goal.shape] = self.level.goal
+            self.space.add_static(self.level.goal.shape)
 
         #gravity polygons
         self.mode_gvol=False
@@ -83,6 +88,7 @@ class Game(object):
         #the player
         self.player = Player(self)
         self.space.add(self.player.body, self.player.shape)
+        self.shape_map[self.player.shape] = self.player
         
         #The screen to collide with what we need to draw
         self.screen_body = pm.Body(pm.inf, pm.inf)
@@ -170,6 +176,7 @@ class Game(object):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 exit()
+                
             elif e.type == pygame.KEYDOWN:
                 if e.key == K_e:
                     self.mode_edit = not self.mode_edit
@@ -230,6 +237,7 @@ class Game(object):
                     self.move_right = False
                 elif e.key == K_SPACE:
                     self.jump = False
+                    
             elif e.type == pygame.MOUSEBUTTONDOWN and self.mode_edit:
                 if e.button == 1:
                     self.mode_grav_poly=True
@@ -240,6 +248,19 @@ class Game(object):
                     else:
                         pos=self.screen2world(e.pos)
                     self.pos_start=pos
+                
+                elif e.button == 3:
+                    pos = self.screen2world(e.pos)
+                    self.level.emitters.append(particles.Emitter(pos, 0.01))
+                    
+                elif e.button == 2:
+                    pos = self.screen2world(e.pos)
+                    if self.level.goal != None:
+                        del self.shape_map[self.level.goal.shape]
+                        self.space.remove_static(self.level.goal.shape)
+                    self.level.goal = portal.Portal(pos)
+                    self.shape_map[self.level.goal.shape] = self.level.goal
+                    self.space.add_static(self.level.goal.shape)                  
 
             elif e.type == pygame.MOUSEBUTTONUP and self.mode_edit:
                 if e.button == 1:
@@ -249,6 +270,7 @@ class Game(object):
                     else:
                         pos=self.screen2world(e.pos)
                     self.pos_end=pos
+                    
             elif e.type == JOYHATMOTION:
                 x, y = e.value
                 if x == 0:
@@ -375,20 +397,28 @@ class Game(object):
                     self.grav_vec =  (self.pos_end[0]-self.pos_start[0], self.pos_end[1]-self.pos_start[1])
                     self.pos_start=None
                     self.pos_end=None
-                elif self.mode_grav_vec is False and self.mode_grav_poly and self.pos_start is not None:#not doing gravity vector
+                #not doing gravity vector
+                elif self.mode_grav_vec is False and self.mode_grav_poly and self.pos_start is not None:
                     self.poly_verts.append((self.pos_start[0],self.pos_start[1]))
                     self.mode_grav_poly=False
-            #think gravity was set: add gravity object and clear our vars
+                    
+
             elif self.pos_start is not None and self.pos_end is not None:
                 body = pm.Body(pm.inf, pm.inf)
                 shape = pm.Segment(body, self.pos_start, self.pos_end, 5.0)
                 shape.friction = 1.0
                 self.space.add_static(shape)
-                line = level.Line(self.pos_start, self.pos_end, shape)
+                if pygame.key.get_mods() & KMOD_SHIFT:
+                    lethal = True
+                else:
+                    lethal = False
+                line = level.Line(self.pos_start, self.pos_end, shape, lethal)
                 self.level.add_line(line)
                 self.shape_map[shape] = line
                 self.pos_start = None
                 self.pos_end = None
+                
+            #think gravity was set: add gravity object and clear our vars                
             if self.grav_set and self.mode_grav_vec is not None and self.poly_verts != []:
                 gvol = GravityVolume(self.poly_verts, self.grav_vec)
                 self.level.add_gvol(gvol)
@@ -437,12 +467,6 @@ class Game(object):
         # Draw start portal
         ox, oy = self.world2screen((0,0))
         pygame.draw.ellipse(screen, (255,237,3), pygame.Rect(ox - 30, oy - 60, 60, 120), 4)
-
-        for particle in self.particles:
-            particle.draw(screen, self)
-
-        #Draw the player
-        self.player.draw(screen, self)
         
         if self.mode_edit:
             pos_snap=self.level.check_snap(self.pos_mouse,self.snap_radius)
@@ -474,15 +498,17 @@ class Game(object):
             points = self.player.shape.get_points()
             flipped = map(self.world2screen,points)
             pygame.draw.polygon(screen,(0,0,255),flipped,1)
+            
+            for e in self.level.emitters:
+                e.draw(screen, self)
 
         #Draw other stuff
         for shape in self.on_screen:
             obj = self.shape_map.get(shape, None)
-            if isinstance(obj, level.Line) or isinstance(obj, particles.Particle):
+            if isinstance(obj, (level.Line, particles.Particle, Player, portal.Portal)):
                 obj.draw(screen, self)
-            elif isinstance(obj, GravityVolume) or isinstance(obj, particles.Emitter):
-                if self.mode_edit:
-                    obj.draw(screen, self)
+            elif isinstance(obj, GravityVolume) and self.mode_edit:
+                obj.draw(screen, self)
 
         pygame.display.flip()
         
