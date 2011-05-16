@@ -259,6 +259,8 @@ class Game(object):
                 exit()
                 
             elif e.type == pygame.KEYDOWN:
+                if e.key == K_f:
+                    pygame.display.toggle_fullscreen()
                 if e.key == K_e:
                     self.mode_edit = not self.mode_edit
                 elif self.mode_edit:

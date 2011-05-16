@@ -5,8 +5,18 @@ ROOT = os.path.normpath(os.path.join(sys.path[0], '..'))
 RES = os.path.join(ROOT, 'res')
 
 
-LEVELS = ['level.0.pickle', 'level.1.pickle','level.2.pickle','level.3.pickle','level.4.pickle']
-#LEVELS = ['level.pickle']
+LEVELS = ['level.daniel.0.pickle', 
+          'level.jon.1.pickle', 
+          'level.tao.0.pickle', 
+          'level.daniel.1.pickle', 
+          'level.jon.2.pickle', 
+          'level.daniel.2.pickle', 
+          'level.daniel.3.pickle',
+          'level.jon.3.pickle',
+          'level.jon.4.pickle',
+          'level.daniel.4.pickle',
+          'level.tao.1.pickle',
+          'level.tao.2.pickle']
 
 WIDTH = 800
 HEIGHT = 600
