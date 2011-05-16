@@ -41,6 +41,8 @@ class Attract(SplashScreen):
             if e.type == pygame.QUIT:
                 exit()
             if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_f:
+                    pygame.display.toggle_fullscreen()
                 if e.key == pygame.K_RETURN:
                     return 1
         pygame.display.flip()
@@ -94,6 +96,8 @@ class GameOver(SplashScreen):
             if e.type == pygame.QUIT:
                 exit()
             if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_f:
+                    pygame.display.toggle_fullscreen()
                 if e.key == pygame.K_RETURN:
                     return 1
         pygame.display.flip()
@@ -122,6 +126,8 @@ class Win(SplashScreen):
             if e.type == pygame.QUIT:
                 exit()
             if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_f:
+                    pygame.display.toggle_fullscreen()
                 if e.key == pygame.K_RETURN:
                     return 5
         pygame.display.flip()
