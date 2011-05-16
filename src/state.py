@@ -45,6 +45,9 @@ class Attract(SplashScreen):
                     pygame.display.toggle_fullscreen()
                 if e.key == pygame.K_RETURN:
                     return 1
+            elif e.type == pygame.JOYBUTTONDOWN:
+                if e.button == 1:
+                    return 1
         pygame.display.flip()
         return 0
 
@@ -68,6 +71,9 @@ def pause(screen,clock):
             exit()
         if e.type == pygame.KEYDOWN:
             if e.key == pygame.K_RETURN:
+                return 1
+        elif e.type == pygame.JOYBUTTONDOWN:
+            if e.button == 1:
                 return 1
     clock.tick(10)
     screen.blit(ingameSurface,(0,0))
@@ -102,6 +108,11 @@ class GameOver(SplashScreen):
                     return 1
                 if e.key == pygame.K_ESCAPE:
                     return 0
+            elif e.type == pygame.JOYBUTTONDOWN:
+                if e.button == 1:
+                    return 1
+                if e.button == 2:
+                    return 0
         pygame.display.flip()
         return 6
 
@@ -131,6 +142,9 @@ class Win(SplashScreen):
                 if e.key == pygame.K_f:
                     pygame.display.toggle_fullscreen()
                 if e.key == pygame.K_RETURN:
+                    return 5
+            elif e.type == pygame.JOYBUTTONDOWN:
+                if e.button == 1:
                     return 5
         pygame.display.flip()
         return 4
