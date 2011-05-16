@@ -13,7 +13,7 @@ LEVELS = ['level.daniel.0.pickle',
           'level.daniel.2.pickle', 
           'level.daniel.3.pickle',
           'level.jon.3.pickle',
-          'level.jon.4.pickle',
+          #'level.jon.4.pickle',
           'level.daniel.4.pickle',
           'level.tao.1.pickle',
           'level.tao.2.pickle']

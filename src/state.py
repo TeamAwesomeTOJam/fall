@@ -100,6 +100,8 @@ class GameOver(SplashScreen):
                     pygame.display.toggle_fullscreen()
                 if e.key == pygame.K_RETURN:
                     return 1
+                if e.key == pygame.K_ESCAPE:
+                    return 0
         pygame.display.flip()
         return 6
 
