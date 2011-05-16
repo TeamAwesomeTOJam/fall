@@ -4,7 +4,9 @@ import os.path
 ROOT = os.path.normpath(os.path.join(sys.path[0], '..')) 
 RES = os.path.join(ROOT, 'res')
 
-LEVELS = ['level.pickle']
+
+LEVELS = ['level.0.pickle', 'level.1.pickle','level.2.pickle','level.3.pickle','level.4.pickle']
+#LEVELS = ['level.pickle']
 
 WIDTH = 800
 HEIGHT = 600
