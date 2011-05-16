@@ -46,6 +46,7 @@ class Level(object):
         self.lines = []
         self.gvols = []
         self.emitters = []
+        self.coins = []
         self.snaps = {}
 
     def save_level(self, path):
@@ -78,6 +79,9 @@ class Level(object):
     
     def add_emitter(self, emitter):
         self.emitters.append(emitter)
+        
+    def add_coin(self, coin):
+        self.coins.append(coin)
         
     def set_goal(self, goal):
         self.goal = goal

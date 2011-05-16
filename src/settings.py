@@ -4,8 +4,7 @@ import os.path
 ROOT = os.path.normpath(os.path.join(sys.path[0], '..')) 
 RES = os.path.join(ROOT, 'res')
 
-#LEVELS = ['level.t1.pickle', 'level.t2.pickle', 'level.t3.pickle']
-LEVELS = ['level.t3.pickle']
+LEVELS = ['level.pickle']
 
 WIDTH = 800
 HEIGHT = 600
@@ -23,6 +22,7 @@ COLLTYPE_LETHAL = 4
 COLLTYPE_GOAL = 5
 COLLTYPE_PARTICLE = 6
 COLLTYPE_MOUSE = 7
+COLLTYPE_COIN = 8
 
 #Player physics
 
@@ -30,7 +30,7 @@ PLAYER_MASS = 10
 PLAYER_RADIUS = 20
 PLAYER_FRICTION = 1.0
 
-PLAYER_SPEED = 170
+PLAYER_SPEED = 200
 
 PLAYER_WALL_COLLISION_ANGLE = 30
 PLAYER_GROUND_COLLISION_ANGLE = 50
