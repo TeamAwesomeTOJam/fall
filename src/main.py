@@ -36,8 +36,11 @@ def main():
             state = 6
         if state == 6:
             state = go.game_over(screen,clock)
-            if state == 1:
+            if state == 0:
+                level_idx = 0
+            if state == 0 or state == 1:
                 game = Game(os.path.join(RES, LEVELS[level_idx]))
+                
         if state == 4:
             state = w.win(screen, clock)
         if state == 5:
