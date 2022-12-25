@@ -4,8 +4,9 @@ import math
 import pymunk
 import pygame
 from pygame.locals import *
+from pymunk import Vec2d
 
-from settings import *
+from .settings import *
 
 
 class Particle(object):
@@ -18,6 +19,7 @@ class Particle(object):
         self.shape = pymunk.Circle(self.body, 1)
         self.shape.collision_type = COLLTYPE_PARTICLE
         self.gravity_set = False
+        self.gravity = Vec2d(0, 0)
         
     def draw(self, screen, game):
         pygame.draw.circle(screen, (50,50,255), game.world2screen(self.body.position), 1)
@@ -35,8 +37,8 @@ class Emitter(object):
             self.counter -= EMITTER_PERIOD
             pp = self.position
             pv = pymunk.Vec2d(0, 1)
-            pv.length = 100
-            pv.angle = random.random() * math.pi * 2
+            pv = pv.scale_to_length(100)
+            pv = pv.rotated(random.random() * math.pi * 2)
             p = Particle(pp, pv)
             game.particles.append(p)
             game.shape_map[p.shape] = p

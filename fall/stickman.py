@@ -1,11 +1,13 @@
 import os, sys
 import math
 import pickle
+from pickle import Unpickler
 
 import pygame
 from pygame.locals import *
 
-import settings
+from . import settings
+
 
 SPINE = 0
 L_SHOULDER = 1
@@ -48,7 +50,8 @@ class StickMan(object):
     def load_animations(self):
         try:
             in_file = open(self.animation_path, 'rb')
-            animations = pickle.load(in_file)
+            up = AnimationUnpickler(in_file)
+            animations = up.load()
             for animation in animations:
                 animation.repeat = False
                 for frame in animation:
@@ -101,7 +104,7 @@ class StickMan(object):
     def draw(self, editor=False, selection=None):
         ratio = self.frame_elapsed / self.animation.frame_duration
         i_frame = [pf * (1 - ratio) + nf * (ratio) for pf, nf in zip(self.prev_frame, self.next_frame)]
-        
+
         hip_pos = (64, i_frame[Y_OFFSET])
         shoulder_pos = self._get_endpoint(hip_pos, i_frame[SPINE], self.torso_length * 0.9)
         neck_pos = self._get_endpoint(hip_pos, i_frame[SPINE], self.torso_length)
@@ -265,3 +268,11 @@ if __name__ == '__main__':
             screen.blit(font.render('Angle %.2f' % (sm.prev_frame[control],), True, (255,255,0)), (128, 48))
         pygame.display.flip()
 
+
+class AnimationUnpickler(Unpickler):
+
+    def find_class(self, module, name):
+        if name == "Animation":
+            return Animation
+        else:
+            return super().find_class(module, name)

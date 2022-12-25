@@ -1,7 +1,7 @@
 import pymunk
 import pygame
 
-from settings import *
+from .settings import *
 
 
 class Coin(object):
@@ -12,7 +12,7 @@ class Coin(object):
         self._init_pymunk()
 
     def _init_pymunk(self):
-        self.body = pymunk.Body(pymunk.inf, pymunk.inf)
+        self.body = pymunk.Body(body_type=pymunk.Body.STATIC)
         self.body.position = self.position
         self.shape = pymunk.Circle(self.body, 8)
         self.shape.collision_type = COLLTYPE_COIN

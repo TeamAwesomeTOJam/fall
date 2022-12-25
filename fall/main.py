@@ -1,14 +1,15 @@
 import pygame
-from state import *
-from settings import *
-from game import Game
-from stickman import *
+from .state import *
+from . import settings
+from .game import Game
+from .stickman import *
+
 
 def main():
     pygame.init()
     if pygame.joystick.get_count() > 0:
         pygame.joystick.Joystick(0).init()
-    screen = pygame.display.set_mode((WIDTH,HEIGHT))
+    screen = pygame.display.set_mode((settings.WIDTH, settings.HEIGHT), flags=FULLSCREEN)
     clock = pygame.time.Clock()
     game = None
     level_idx = 0
@@ -25,8 +26,8 @@ def main():
             state = game.tick(screen,clock)
             if state == 4:
                 level_idx += 1
-                if level_idx < len(LEVELS):
-                    game = Game(os.path.join(RES, LEVELS[level_idx]))
+                if level_idx < len(settings.LEVELS):
+                    game = Game(os.path.join(settings.RES, settings.LEVELS[level_idx]))
                     state = 1
         if state == 2:
             state = pause(screen,clock)
@@ -39,13 +40,13 @@ def main():
             if state == 0:
                 level_idx = 0
             if state == 0 or state == 1:
-                game = Game(os.path.join(RES, LEVELS[level_idx]))
+                game = Game(os.path.join(settings.RES, settings.LEVELS[level_idx]))
                 
         if state == 4:
             state = w.win(screen, clock)
         if state == 5:
             level_idx = 0
-            game = Game(os.path.join(RES, LEVELS[level_idx]))
+            game = Game(os.path.join(settings.RES, settings.LEVELS[level_idx]))
             state = 0
             
 

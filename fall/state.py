@@ -1,16 +1,17 @@
 import pygame
-from stickman import StickMan, Animation
+from . import settings
+from .stickman import StickMan, Animation
 import os
-from settings import *
 
 
 class SplashScreen(object):
     
     def __init__(self, default_animation):
-        self.font_big = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
-        self.font_small = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 13)
-        self.model = StickMan(os.path.join(RES, 'animations.pickle'))
+        self.font_big = pygame.font.Font(os.path.join(settings.RES, 'LiberationSans-Regular.ttf'), 60)
+        self.font_small = pygame.font.Font(os.path.join(settings.RES, 'LiberationSans-Regular.ttf'), 13)
+        self.model = StickMan(os.path.join(settings.RES, 'animations.pickle'))
         self.model.set_default_animation(default_animation)
+
 
 class Attract(SplashScreen):
 
@@ -43,13 +44,15 @@ class Attract(SplashScreen):
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_f:
                     pygame.display.toggle_fullscreen()
-                if e.key == pygame.K_RETURN:
+                elif e.key == pygame.K_ESCAPE:
+                    exit()
+                else:
                     return 1
             elif e.type == pygame.JOYBUTTONDOWN:
-                if e.button == 1:
-                    return 1
+                return 1
         pygame.display.flip()
         return 0
+
 
 def pause(screen,clock):
     height = screen.get_height()
@@ -62,19 +65,22 @@ def pause(screen,clock):
     ingameSurface.blit(rect,(0,0))
     #font = pygame.font.SysFont('helvetica',60)
     #font.set_bold(True)
-    font_big = pygame.font.Font(os.path.join(RES, 'LiberationSans-Regular.ttf'), 60)
+    font_big = pygame.font.Font(os.path.join(settings.RES, 'LiberationSans-Regular.ttf'), 60)
     pause=font_big.render('Paused',True,(255,0,0))
-    screen.blit(pause,\
+    screen.blit(pause,
             ((width-pause.get_width())*.5,(height-pause.get_height())*.5))
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             exit()
         if e.type == pygame.KEYDOWN:
-            if e.key == pygame.K_RETURN:
+            if e.key == pygame.K_f:
+                pygame.display.toggle_fullscreen()
+            elif e.key == pygame.K_ESCAPE:
+                exit()
+            else:
                 return 1
         elif e.type == pygame.JOYBUTTONDOWN:
-            if e.button == 1:
-                return 1
+            return 1
     clock.tick(10)
     screen.blit(ingameSurface,(0,0))
     pygame.display.flip()
@@ -104,15 +110,12 @@ class GameOver(SplashScreen):
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_f:
                     pygame.display.toggle_fullscreen()
-                if e.key == pygame.K_RETURN:
+                elif e.key == pygame.K_ESCAPE:
+                    exit()
+                else:
                     return 1
-                if e.key == pygame.K_ESCAPE:
-                    return 0
             elif e.type == pygame.JOYBUTTONDOWN:
-                if e.button == 1:
-                    return 1
-                if e.button == 2:
-                    return 0
+                return 1
         pygame.display.flip()
         return 6
 
@@ -141,10 +144,11 @@ class Win(SplashScreen):
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_f:
                     pygame.display.toggle_fullscreen()
-                if e.key == pygame.K_RETURN:
+                elif e.key == pygame.K_ESCAPE:
+                    exit()
+                else:
                     return 5
             elif e.type == pygame.JOYBUTTONDOWN:
-                if e.button == 1:
-                    return 5
+                return 5
         pygame.display.flip()
         return 4

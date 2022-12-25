@@ -1,10 +1,15 @@
 import os
 import pickle
+from pickle import Unpickler
 import pygame
 import pymunk as pm
 from pymunk import Vec2d
-from settings import *
-from gravityvolume import *
+
+from .coin import Coin
+from .particles import Emitter
+from .portal import Portal
+from .settings import *
+from .gravityvolume import *
 
 
 class Line(object):
@@ -27,7 +32,7 @@ class Line(object):
         self.start = state['start']
         self.end = state['end']
         self.lethal = state['lethal']
-        self.shape = pm.Segment(pm.Body(pm.inf, pm.inf), self.start, self.end, 5.0)
+        self.shape = pm.Segment(pm.Body(body_type=pm.Body.STATIC), self.start, self.end, 5.0)
         if self.lethal:
             self.shape.collision_type = COLLTYPE_LETHAL
             
@@ -93,12 +98,32 @@ class Level(object):
             self.add_or_inc((line.end[0], line.end[1]) )
         
     def check_snap(self,u,r):
-        for v in self.snaps.iterkeys():
+        for v in self.snaps.keys():
             if (u[0]-v[0])**2 + (u[1]-v[1])**2 < r**2:
                 return v
 
 
 def load_level(path):
     in_file = open(path, 'rb')
-    return pickle.load(in_file)
+    up = LevelUnpickler(in_file)
+    level = up.load()
+    return level
 
+
+class LevelUnpickler(Unpickler):
+
+    def find_class(self, module, name):
+        if name == 'Level':
+            return Level
+        elif name == 'Portal':
+            return Portal
+        elif name == 'GravityVolume':
+            return GravityVolume
+        elif name == 'Coin':
+            return Coin
+        elif name == 'Line':
+            return Line
+        elif name == 'Emitter':
+            return Emitter
+        else:
+            return super().find_class(module, name)

@@ -1,8 +1,5 @@
-import sys
-import os.path
-
-ROOT = os.path.normpath(os.path.join(sys.path[0], '..')) 
-RES = os.path.join(ROOT, 'res')
+ROOT = None  # set in run.py
+RES = None  # set in run.py
 
 
 LEVELS = ['level.daniel.0.pickle', 
@@ -18,8 +15,8 @@ LEVELS = ['level.daniel.0.pickle',
           'level.tao.1.pickle',
           'level.tao.2.pickle']
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1280
+HEIGHT = 720
 
 PAN_SPEED = 5
 
@@ -53,7 +50,7 @@ JUMP_STRENGTH = 700
 DEADZONE = 0.3
 
 DOWN_HILL_GRACE = 0.2
-FLIP_THRESHOLD = 50
+FLIP_THRESHOLD = 0.00000000000001
 
 AIR_CONTROL = 10
 

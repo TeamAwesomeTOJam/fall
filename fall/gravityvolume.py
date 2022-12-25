@@ -3,7 +3,7 @@ import weakref
 import pygame
 import pymunk
 
-from settings import *
+from .settings import *
 
 
 class GravityVolume(object):
@@ -14,7 +14,7 @@ class GravityVolume(object):
         self._init_pymunk()
     
     def _init_pymunk(self):
-        self.body = pymunk.Body(pymunk.inf, pymunk.inf)
+        self.body = pymunk.Body(body_type=pymunk.Body.STATIC)
         self.shape = pymunk.Poly(self.body, self.vertices)
         self.shape.collision_type = COLLTYPE_GRAVITY
         
@@ -28,6 +28,6 @@ class GravityVolume(object):
         self._init_pymunk()
         
     def draw(self, screen, game):
-        points = self.shape.get_points()
-        flipped = map(game.world2screen, points)
+        points = self.shape.get_vertices()
+        flipped = list(map(game.world2screen, points))
         pygame.draw.polygon(screen, (0,0,255), flipped, 1)
